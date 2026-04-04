@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,27 +10,20 @@ import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import { addReservation, type Reservation } from "@/lib/reservations";
 import { bookingSchema, type BookingFormData } from "@/lib/schemas";
+import { supabase } from "@/lib/supabase";
 
-const visitTypes = [
-  {
-    id: "guided" as const,
-    label: "Visita guiada",
-    description: "Recorrido con guía experto por las áreas principales",
-    icon: "🌿",
-  },
-  {
-    id: "educational" as const,
-    label: "Visita educativa",
-    description: "Programa educativo para grupos escolares",
-    icon: "📚",
-  },
-  {
-    id: "free" as const,
-    label: "Recorrido libre",
-    description: "Explora el jardín a tu propio ritmo",
-    icon: "🚶",
-  },
-];
+interface TipoVisita {
+  id_tipo_visita: number;
+  nombre_visita: string;
+  descripcion: string;
+  duracion_estimada: number;
+}
+
+const iconMap: Record<string, string> = {
+  "Free Walk": "🚶",
+  "Guided Tour": "🌿",
+  "School Trip": "📚",
+};
 
 const dates = [
   { day: "Lun", date: 12, month: "May", full: "12 de Mayo, 2026" },
@@ -48,7 +41,11 @@ const timeSlots = [
 
 export default function BookingPage() {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<Reservation["visitType"]>("guided");
+  
+  const [dbVisitTypes, setDbVisitTypes] = useState<TipoVisita[]>([]);
+  const [selectedType, setSelectedType] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("1");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -62,13 +59,34 @@ export default function BookingPage() {
     resolver: zodResolver(bookingSchema),
   });
 
+  useEffect(() => {
+    const fetchTiposVisita = async () => {
+      const { data, error } = await supabase
+        .from('tipos_visita')
+        .select('*')
+        .order('id_tipo_visita');
+
+      if (error) {
+        console.error('Error cargando los tipos de visita:', error);
+      } else if (data) {
+        setDbVisitTypes(data);
+        if (data.length > 0) setSelectedType(data[0].id_tipo_visita);
+      }
+      setIsLoading(false);
+    };
+
+    fetchTiposVisita();
+  }, []);
+
   const onSubmit = (data: BookingFormData) => {
     const slot = timeSlots.find((s) => s.id === selectedTime)!;
+    const selectedVisitName = dbVisitTypes.find(t => t.id_tipo_visita === selectedType)?.nombre_visita || "guided";
+
     addReservation({
       fullName: data.fullName.trim(),
       cedula: data.cedula.trim(),
       email: data.email.trim(),
-      visitType: selectedType,
+      visitType: selectedVisitName as any,
       date: dates[selectedDate].full,
       time: slot.time,
     });
@@ -163,28 +181,33 @@ export default function BookingPage() {
                     Seleccione el tipo de visita
                   </h3>
                 </div>
+                
                 <div className="flex flex-col sm:flex-row gap-3">
-                  {visitTypes.map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setSelectedType(type.id)}
-                      className={`flex-1 flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                        selectedType === type.id
-                          ? "border-[var(--green-primary)] bg-[var(--green-light)]/30"
-                          : "border-[var(--border)] bg-white hover:border-[var(--green-primary)]/30"
-                      }`}
-                    >
-                      <span className="text-2xl">{type.icon}</span>
-                      <div>
-                        <p className="font-bold text-sm text-[var(--green-primary)]">
-                          {type.label}
-                        </p>
-                        <p className="text-xs text-[var(--text-muted)] mt-0.5 hidden sm:block">
-                          {type.description}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
+                  {isLoading ? (
+                    <p className="text-sm text-[var(--text-muted)] animate-pulse p-4">Cargando experiencias desde la base de datos...</p>
+                  ) : (
+                    dbVisitTypes.map((type) => (
+                      <button
+                        key={type.id_tipo_visita}
+                        onClick={() => setSelectedType(type.id_tipo_visita)}
+                        className={`flex-1 flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                          selectedType === type.id_tipo_visita
+                            ? "border-[var(--green-primary)] bg-[var(--green-light)]/30"
+                            : "border-[var(--border)] bg-white hover:border-[var(--green-primary)]/30"
+                        }`}
+                      >
+                        <span className="text-2xl">{iconMap[type.nombre_visita] || "🪴"}</span>
+                        <div>
+                          <p className="font-bold text-sm text-[var(--green-primary)]">
+                            {type.nombre_visita}
+                          </p>
+                          <p className="text-xs text-[var(--text-muted)] mt-0.5 hidden sm:block">
+                            {type.descripcion}
+                          </p>
+                        </div>
+                      </button>
+                    ))
+                  )}
                 </div>
               </section>
 
