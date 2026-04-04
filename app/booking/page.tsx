@@ -41,11 +41,11 @@ const timeSlots = [
 
 export default function BookingPage() {
   const router = useRouter();
-  
+
   const [dbVisitTypes, setDbVisitTypes] = useState<TipoVisita[]>([]);
   const [selectedType, setSelectedType] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("1");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -103,13 +103,13 @@ export default function BookingPage() {
       <Navbar />
 
       <main className="flex-1 w-full">
-        <div className="mx-auto max-w-[1280px] px-4 md:px-10 py-8 md:py-12">
+        <div className="mx-auto max-w-7xl px-4 md:px-10 py-8 md:py-12">
           {/* Page header */}
           <div className="mb-8 md:mb-12">
-            <h1 className="text-2xl md:text-4xl font-bold text-[var(--green-primary)] tracking-tight mb-3">
+            <h1 className="text-2xl md:text-4xl font-bold text-green-primary tracking-tight mb-3">
               Agenda el día de tu experiencia
             </h1>
-            <p className="text-base md:text-lg text-[var(--text-dark)] max-w-2xl leading-relaxed">
+            <p className="text-base md:text-lg text-text-dark max-w-2xl leading-relaxed">
               Conéctate con la naturaleza en nuestro santuario de más de 20
               hectáreas. Por favor, proporciona tus datos de visitante y elige
               el tipo de visita que prefieras.
@@ -119,10 +119,10 @@ export default function BookingPage() {
           <div className="flex flex-col lg:grid lg:grid-cols-[472px_1fr] lg:gap-12">
             {/* Left: visitor form */}
             <div className="order-2 lg:order-1">
-              <div className="bg-white rounded-2xl border border-[var(--border)] p-8 mb-6">
+              <div className="bg-white rounded-2xl border border-border p-8 mb-6">
                 <div className="flex items-center gap-3 mb-6">
                   <UserIcon />
-                  <h2 className="text-xl md:text-2xl font-bold text-[var(--green-primary)]">
+                  <h2 className="text-xl md:text-2xl font-bold text-green-primary">
                     Datos del visitante
                   </h2>
                 </div>
@@ -151,9 +151,9 @@ export default function BookingPage() {
                   />
                 </div>
 
-                <div className="mt-6 flex gap-3 p-4 bg-[var(--green-light)]/30 rounded-xl border border-[var(--green-light)]">
+                <div className="mt-6 flex gap-3 p-4 bg-(--green-light)/30 rounded-xl border border-green-light">
                   <InfoIcon />
-                  <p className="text-sm text-[var(--text-dark)] leading-relaxed">
+                  <p className="text-sm text-text-dark leading-relaxed">
                     Recibirás un correo electrónico de confirmación con tu
                     billete digital inmediatamente después de realizar la
                     reserva.
@@ -162,8 +162,8 @@ export default function BookingPage() {
               </div>
 
               <div className="hidden lg:block relative h-48 rounded-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-[var(--green-primary)]">
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-primary)] to-transparent" />
+                <div className="absolute inset-0 bg-green-primary">
+                  <div className="absolute inset-0 bg-linear-to-t from-green-primary to-transparent" />
                 </div>
                 <p className="absolute bottom-4 left-4 text-sm text-white/80">
                   Jardín Botánico UNET - Área de invernadero
@@ -177,31 +177,30 @@ export default function BookingPage() {
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <TagIcon />
-                  <h3 className="text-lg font-bold text-[var(--green-primary)]">
+                  <h3 className="text-lg font-bold text-green-primary">
                     Seleccione el tipo de visita
                   </h3>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3">
                   {isLoading ? (
-                    <p className="text-sm text-[var(--text-muted)] animate-pulse p-4">Cargando experiencias desde la base de datos...</p>
+                    <p className="text-sm text-text-muted animate-pulse p-4">Cargando experiencias desde la base de datos...</p>
                   ) : (
                     dbVisitTypes.map((type) => (
                       <button
                         key={type.id_tipo_visita}
                         onClick={() => setSelectedType(type.id_tipo_visita)}
-                        className={`flex-1 flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${
-                          selectedType === type.id_tipo_visita
-                            ? "border-[var(--green-primary)] bg-[var(--green-light)]/30"
-                            : "border-[var(--border)] bg-white hover:border-[var(--green-primary)]/30"
-                        }`}
+                        className={`flex-1 flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all cursor-pointer ${selectedType === type.id_tipo_visita
+                          ? "border-green-primary bg-(--green-light)/30"
+                          : "border-border bg-white hover:border-(--green-primary)/30"
+                          }`}
                       >
                         <span className="text-2xl">{iconMap[type.nombre_visita] || "🪴"}</span>
                         <div>
-                          <p className="font-bold text-sm text-[var(--green-primary)]">
+                          <p className="font-bold text-sm text-green-primary">
                             {type.nombre_visita}
                           </p>
-                          <p className="text-xs text-[var(--text-muted)] mt-0.5 hidden sm:block">
+                          <p className="text-xs text-text-muted mt-0.5 hidden sm:block">
                             {type.descripcion}
                           </p>
                         </div>
@@ -215,7 +214,7 @@ export default function BookingPage() {
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <CalendarIcon />
-                  <h3 className="text-lg font-bold text-[var(--green-primary)]">
+                  <h3 className="text-lg font-bold text-green-primary">
                     Seleccione la fecha de su visita
                   </h3>
                 </div>
@@ -224,11 +223,10 @@ export default function BookingPage() {
                     <button
                       key={i}
                       onClick={() => setSelectedDate(i)}
-                      className={`flex flex-col items-center justify-center min-w-[64px] h-20 rounded-xl border-2 transition-all cursor-pointer ${
-                        selectedDate === i
-                          ? "border-[var(--green-primary)] bg-[var(--green-primary)] text-white"
-                          : "border-[var(--border)] bg-white hover:border-[var(--green-primary)]/30 text-[var(--text-dark)]"
-                      }`}
+                      className={`flex flex-col items-center justify-center min-w-16 h-20 rounded-xl border-2 transition-all cursor-pointer ${selectedDate === i
+                        ? "border-green-primary bg-green-primary text-white"
+                        : "border-border bg-white hover:border-(--green-primary)/30 text-text-dark"
+                        }`}
                     >
                       <span className="text-xs font-medium uppercase">
                         {d.day}
@@ -244,7 +242,7 @@ export default function BookingPage() {
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <ClockIcon />
-                  <h3 className="text-lg font-bold text-[var(--green-primary)]">
+                  <h3 className="text-lg font-bold text-green-primary">
                     Seleccione el horario de su visita
                   </h3>
                 </div>
@@ -253,29 +251,27 @@ export default function BookingPage() {
                     <button
                       key={slot.id}
                       onClick={() => setSelectedTime(slot.id)}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                        selectedTime === slot.id
-                          ? "border-[var(--green-primary)] bg-[var(--green-light)]/30"
-                          : "border-[var(--border)] bg-white hover:border-[var(--green-primary)]/30"
-                      }`}
+                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedTime === slot.id
+                        ? "border-green-primary bg-(--green-light)/30"
+                        : "border-border bg-white hover:border-(--green-primary)/30"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            selectedTime === slot.id
-                              ? "border-[var(--green-primary)]"
-                              : "border-[var(--border)]"
-                          }`}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedTime === slot.id
+                            ? "border-green-primary"
+                            : "border-border"
+                            }`}
                         >
                           {selectedTime === slot.id && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-[var(--green-primary)]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-primary" />
                           )}
                         </div>
-                        <span className="font-semibold text-[var(--green-primary)]">
+                        <span className="font-semibold text-green-primary">
                           {slot.time}
                         </span>
                       </div>
-                      <span className="text-sm text-[var(--text-muted)]">
+                      <span className="text-sm text-text-muted">
                         {slot.spots} spots left
                       </span>
                     </button>
@@ -301,10 +297,10 @@ export default function BookingPage() {
             <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-green-100 flex items-center justify-center">
               <SuccessIcon />
             </div>
-            <h3 className="text-xl font-bold text-[var(--green-primary)] mb-2">
+            <h3 className="text-xl font-bold text-green-primary mb-2">
               Agendamiento exitoso
             </h3>
-            <p className="text-sm text-[var(--text-dark)] mb-8 leading-relaxed">
+            <p className="text-sm text-text-dark mb-8 leading-relaxed">
               Muchas gracias por agendar tu visita, <strong>{getValues("fullName")}</strong>.
               <br />
               En breve recibirás un correo de confirmación a{" "}
@@ -312,7 +308,7 @@ export default function BookingPage() {
             </p>
             <button
               onClick={handleContinue}
-              className="px-8 py-2.5 rounded-lg bg-[var(--green-primary)] text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
+              className="px-8 py-2.5 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
             >
               Continuar
             </button>
