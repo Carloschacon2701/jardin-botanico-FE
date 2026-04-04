@@ -19,6 +19,24 @@ interface TipoVisita {
   duracion_estimada: number;
 }
 
+interface BloqueHorario {
+  id_bloque: number;
+  hora_inicio: string;
+  hora_fin: string;
+}
+
+function formatTimeRange(start: string, end: string) {
+  const format = (time: string) => {
+    const [h, m] = time.split(':');
+    let hour = parseInt(h, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    const formattedHour = hour < 10 ? `0${hour}` : hour;
+    return `${formattedHour}:${m} ${ampm}`;
+  };
+  return `${format(start)} - ${format(end)}`;
+}
+
 const iconMap: Record<string, string> = {
   "Free Walk": "🚶",
   "Guided Tour": "🌿",
@@ -33,11 +51,6 @@ const dates = [
   { day: "Vie", date: 16, month: "May", full: "16 de Mayo, 2026" },
 ];
 
-const timeSlots = [
-  { id: "1", time: "9:00 AM - 11:00 AM", spots: 15 },
-  { id: "2", time: "11:30 AM - 1:30 PM", spots: 8 },
-  { id: "3", time: "2:00 PM - 4:00 PM", spots: 22 },
-];
 
 export default function BookingPage() {
   const router = useRouter();
@@ -46,8 +59,11 @@ export default function BookingPage() {
   const [selectedType, setSelectedType] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [dbTimeSlots, setDbTimeSlots] = useState<BloqueHorario[]>([]); // <--- Nuevo estado
+
+  const [selectedTime, setSelectedTime] = useState<number | null>(null); // <--- Ahora es un número (ID del bloque)
   const [selectedDate, setSelectedDate] = useState(0);
-  const [selectedTime, setSelectedTime] = useState("1");
+
   const [showSuccess, setShowSuccess] = useState(false);
 
   const {
@@ -60,27 +76,38 @@ export default function BookingPage() {
   });
 
   useEffect(() => {
-    const fetchTiposVisita = async () => {
-      const { data, error } = await supabase
-        .from('tipos_visita')
-        .select('*')
-        .order('id_tipo_visita');
+    const fetchDatosIniciales = async () => {
+      const [visitasResponse, bloquesResponse] = await Promise.all([
+        supabase.from('tipos_visita').select('*').order('id_tipo_visita'),
+        supabase.from('bloques_horarios').select('*').order('hora_inicio')
+      ]);
 
-      if (error) {
-        console.error('Error cargando los tipos de visita:', error);
-      } else if (data) {
-        setDbVisitTypes(data);
-        if (data.length > 0) setSelectedType(data[0].id_tipo_visita);
+      if (visitasResponse.error) console.error('Error cargando visitas:', visitasResponse.error);
+      else if (visitasResponse.data) {
+        setDbVisitTypes(visitasResponse.data);
+        if (visitasResponse.data.length > 0) setSelectedType(visitasResponse.data[0].id_tipo_visita);
       }
+
+      if (bloquesResponse.error) console.error('Error cargando bloques:', bloquesResponse.error);
+      else if (bloquesResponse.data) {
+        setDbTimeSlots(bloquesResponse.data);
+        if (bloquesResponse.data.length > 0) setSelectedTime(bloquesResponse.data[0].id_bloque);
+      }
+
       setIsLoading(false);
     };
 
-    fetchTiposVisita();
+    fetchDatosIniciales();
   }, []);
 
+
   const onSubmit = (data: BookingFormData) => {
-    const slot = timeSlots.find((s) => s.id === selectedTime)!;
     const selectedVisitName = dbVisitTypes.find(t => t.id_tipo_visita === selectedType)?.nombre_visita || "guided";
+    const selectedSlot = dbTimeSlots.find(s => s.id_bloque === selectedTime);
+
+    if (!selectedSlot) return;
+
+    const timeString = formatTimeRange(selectedSlot.hora_inicio, selectedSlot.hora_fin);
 
     addReservation({
       fullName: data.fullName.trim(),
@@ -88,7 +115,7 @@ export default function BookingPage() {
       email: data.email.trim(),
       visitType: selectedVisitName as any,
       date: dates[selectedDate].full,
-      time: slot.time,
+      time: timeString, // Pasamos el string formateado bonito
     });
     setShowSuccess(true);
   };
@@ -247,38 +274,44 @@ export default function BookingPage() {
                   </h3>
                 </div>
                 <div className="flex flex-col gap-3">
-                  {timeSlots.map((slot) => (
-                    <button
-                      key={slot.id}
-                      onClick={() => setSelectedTime(slot.id)}
-                      className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedTime === slot.id
-                        ? "border-green-primary bg-(--green-light)/30"
-                        : "border-border bg-white hover:border-(--green-primary)/30"
-                        }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedTime === slot.id
-                            ? "border-green-primary"
-                            : "border-border"
+                  {isLoading ? (
+                    <p className="text-sm text-text-muted animate-pulse p-4">Cargando horarios disponibles...</p>
+                  ) : (
+                    dbTimeSlots.map((slot) => {
+                      const timeString = formatTimeRange(slot.hora_inicio, slot.hora_fin);
+                      return (
+                        <button
+                          key={slot.id_bloque}
+                          onClick={() => setSelectedTime(slot.id_bloque)}
+                          className={`flex items-center justify-between p-4 rounded-xl border-2 transition-all cursor-pointer ${selectedTime === slot.id_bloque
+                            ? "border-green-primary bg-(--green-light)/30"
+                            : "border-border bg-white hover:border-(--green-primary)/30"
                             }`}
                         >
-                          {selectedTime === slot.id && (
-                            <div className="w-2.5 h-2.5 rounded-full bg-green-primary" />
-                          )}
-                        </div>
-                        <span className="font-semibold text-green-primary">
-                          {slot.time}
-                        </span>
-                      </div>
-                      <span className="text-sm text-text-muted">
-                        {slot.spots} spots left
-                      </span>
-                    </button>
-                  ))}
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedTime === slot.id_bloque
+                                ? "border-green-primary"
+                                : "border-border"
+                                }`}
+                            >
+                              {selectedTime === slot.id_bloque && (
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-primary" />
+                              )}
+                            </div>
+                            <span className="font-semibold text-green-primary">
+                              {timeString}
+                            </span>
+                          </div>
+                          <span className="text-sm text-text-muted">
+                            15 spots left
+                          </span>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </section>
-
               <Button size="lg" fullWidth onClick={handleSubmit(onSubmit)}>
                 Reservar ahora
               </Button>
