@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
+import BackButton from "@/components/atoms/BackButton";
 import Button from "@/components/atoms/Button";
 
 const thumbnails = [
@@ -18,57 +19,105 @@ export default function DetailPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
-      <Navbar />
+      {/* Desktop: full navbar */}
+      <div className="hidden lg:block">
+        <Navbar />
+      </div>
+
+      {/* Mobile: compact top app bar */}
+      <header className="lg:hidden sticky top-0 z-50 bg-white border-b border-[var(--border)] flex items-center px-4 h-[73px]">
+        <BackButton />
+        <h1 className="flex-1 text-center text-lg font-bold text-[var(--green-primary)] pr-9">
+          Red Fox Habitat
+        </h1>
+      </header>
 
       <main className="flex-1">
-        {/* Desktop: split layout */}
-        <div className="lg:grid lg:grid-cols-2 lg:min-h-[calc(100vh-73px)]">
-          {/* Left: hero image */}
-          <div className="relative h-[320px] lg:h-auto">
+        {/* ===== MOBILE LAYOUT ===== */}
+        <div className="lg:hidden flex flex-col">
+          {/* Hero image */}
+          <div className="relative w-full h-[320px]">
             <Image
               src={thumbnails[activeThumb].src}
               alt={thumbnails[activeThumb].alt}
               fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
+              sizes="100vw"
               className="object-cover"
               priority
             />
-            <div className="hidden lg:block absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
+          </div>
+
+          {/* Thumbnail gallery */}
+          <div className="flex gap-3 px-4 py-4">
+            {thumbnails.map((thumb, i) => (
+              <button
+                key={thumb.id}
+                onClick={() => setActiveThumb(i)}
+                className={`relative w-[77px] h-[77px] rounded-xl overflow-hidden cursor-pointer transition-all shrink-0 ${
+                  i === activeThumb
+                    ? "ring-2 ring-[var(--green-primary)] ring-offset-2"
+                    : "opacity-60 hover:opacity-100"
+                }`}
+                aria-label={`Ver imagen ${i + 1}`}
+              >
+                <Image
+                  src={thumb.src}
+                  alt={thumb.alt}
+                  fill
+                  sizes="77px"
+                  className="object-cover"
+                />
+              </button>
+            ))}
+          </div>
+
+          {/* Title & description */}
+          <div className="flex flex-col gap-4 px-4 pb-4">
+            <h2 className="text-[28px] font-bold text-[var(--green-primary)] leading-tight">
+              Red Fox Habitat
+            </h2>
+            <p className="text-base text-[var(--text-dark)] leading-[26px]">
+              The red fox (Vulpes vulpes) is the largest of the true foxes and
+              one of the most widely distributed members of the order Carnivora,
+              being present across the entire Northern Hemisphere. In our
+              botanical garden, they frequent the dense woodland borders and open
+              meadows, playing a crucial role in our local ecosystem by
+              controlling small mammal populations.
+            </p>
+          </div>
+
+          {/* Mobile bottom CTA */}
+          <div className="sticky bottom-0 bg-white border-t border-[var(--border)] px-10 py-4">
+            <Button href="/donate" size="lg" fullWidth>
+              <HeartIcon />
+              <span className="ml-2">Donar</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* ===== DESKTOP LAYOUT ===== */}
+        <div className="hidden lg:grid lg:grid-cols-2 min-h-[calc(100vh-73px)]">
+          {/* Left: full-height hero image */}
+          <div className="relative">
+            <Image
+              src={thumbnails[activeThumb].src}
+              alt={thumbnails[activeThumb].alt}
+              fill
+              sizes="50vw"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none" />
           </div>
 
           {/* Right: content */}
-          <div className="flex flex-col">
-            {/* Thumbnail gallery */}
-            <div className="flex gap-3 px-4 py-4 lg:px-16 lg:pt-16 lg:pb-8">
-              {thumbnails.map((thumb, i) => (
-                <button
-                  key={thumb.id}
-                  onClick={() => setActiveThumb(i)}
-                  className={`relative w-[77px] h-[77px] lg:w-[97px] lg:h-[80px] rounded-xl overflow-hidden cursor-pointer transition-all ${
-                    i === activeThumb
-                      ? "ring-2 ring-[var(--green-primary)] ring-offset-2"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                  aria-label={`Ver imagen ${i + 1}`}
-                >
-                  <Image
-                    src={thumb.src}
-                    alt={thumb.alt}
-                    fill
-                    sizes="97px"
-                    className="object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-
-            {/* Text content */}
-            <div className="flex flex-col gap-6 px-4 py-4 lg:px-16 lg:py-8 flex-1">
-              <h1 className="text-3xl lg:text-5xl font-black text-[var(--green-primary)] tracking-tight leading-tight">
+          <div className="flex flex-col px-16 py-16">
+            {/* Title + description */}
+            <div className="flex flex-col gap-6 mb-10">
+              <h2 className="text-5xl font-black text-[var(--green-primary)] tracking-tight leading-tight">
                 Red Fox Habitat
-              </h1>
-
-              <div className="flex flex-col gap-4 text-base lg:text-lg text-[var(--text-dark)] leading-relaxed">
+              </h2>
+              <div className="flex flex-col gap-5 text-lg text-[var(--text-dark)] leading-relaxed">
                 <p>
                   The Red Fox habitat in our botanical garden mimics the diverse
                   temperate forests where these adaptable mammals thrive. Known
@@ -83,16 +132,40 @@ export default function DetailPage() {
                   representation of their natural ecosystem.
                 </p>
               </div>
+            </div>
 
-              {/* CTA */}
-              <div className="mt-auto pt-8 pb-6 lg:pb-16">
-                <Button href="/donate" size="lg" fullWidth>
-                  <HeartIcon />
-                  <span className="ml-2">
-                    ¡Ayudanos a apoyar a nuestros animales!
-                  </span>
-                </Button>
-              </div>
+            {/* Thumbnail gallery */}
+            <div className="flex gap-3 mb-10 pl-11">
+              {thumbnails.map((thumb, i) => (
+                <button
+                  key={thumb.id}
+                  onClick={() => setActiveThumb(i)}
+                  className={`relative w-[97px] h-[80px] rounded-xl overflow-hidden cursor-pointer transition-all shrink-0 ${
+                    i === activeThumb
+                      ? "ring-2 ring-[var(--green-primary)] ring-offset-2 scale-105"
+                      : "opacity-60 hover:opacity-100"
+                  }`}
+                  aria-label={`Ver imagen ${i + 1}`}
+                >
+                  <Image
+                    src={thumb.src}
+                    alt={thumb.alt}
+                    fill
+                    sizes="97px"
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+
+            {/* CTA button */}
+            <div className="mt-auto">
+              <Button href="/donate" size="lg" fullWidth>
+                <HeartIcon />
+                <span className="ml-2">
+                  ¡Ayudanos a apoyar a nuestros animales!
+                </span>
+              </Button>
             </div>
           </div>
         </div>

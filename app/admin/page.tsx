@@ -1,73 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 import ReservationCard from "@/components/molecules/ReservationCard";
-
-const reservations = [
-  {
-    id: "1",
-    name: "Jane Doe",
-    email: "jane@email.com",
-    visitType: "Visita guiada",
-    date: "12 de Mayo, 2026",
-    time: "9:00 AM - 11:00 AM",
-    status: "confirmed" as const,
-  },
-  {
-    id: "2",
-    name: "Carlos Pérez",
-    email: "carlos@email.com",
-    visitType: "Recorrido libre",
-    date: "12 de Mayo, 2026",
-    time: "11:30 AM - 1:30 PM",
-    status: "confirmed" as const,
-  },
-  {
-    id: "3",
-    name: "María García",
-    email: "maria@email.com",
-    visitType: "Visita educativa",
-    date: "12 de Mayo, 2026",
-    time: "2:00 PM - 4:00 PM",
-    status: "pending" as const,
-  },
-  {
-    id: "4",
-    name: "Luis Rodríguez",
-    email: "luis@email.com",
-    visitType: "Visita guiada",
-    date: "13 de Mayo, 2026",
-    time: "9:00 AM - 11:00 AM",
-    status: "confirmed" as const,
-  },
-  {
-    id: "5",
-    name: "Ana Martínez",
-    email: "ana@email.com",
-    visitType: "Recorrido libre",
-    date: "13 de Mayo, 2026",
-    time: "11:30 AM - 1:30 PM",
-    status: "pending" as const,
-  },
-];
+import {
+  getReservations,
+  cancelReservation,
+  seedDemoData,
+  getVisitTypeLabel,
+  type Reservation,
+} from "@/lib/reservations";
 
 export default function AdminPage() {
+  const [reservations, setReservations] = useState<Reservation[]>([]);
   const [showModal, setShowModal] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const loadReservations = () => setReservations(getReservations());
+
+  useEffect(() => {
+    seedDemoData();
+    loadReservations();
+  }, []);
 
   const handleCancel = (id: string) => {
     setShowModal(id);
   };
 
   const confirmCancel = () => {
+    if (showModal) cancelReservation(showModal);
     setShowModal(null);
     setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    loadReservations();
   };
 
   const cancellingReservation = reservations.find((r) => r.id === showModal);
+  const activeCount = reservations.filter((r) => r.status !== "cancelled").length;
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
@@ -95,10 +64,10 @@ export default function AdminPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-[var(--border)] p-6 mb-8 flex items-center justify-between max-w-sm">
             <div>
               <p className="text-sm text-[var(--text-muted)] mb-1">
-                Reservaciones de hoy
+                Reservaciones activas
               </p>
               <p className="text-4xl font-bold text-[var(--green-primary)]">
-                {reservations.length}
+                {activeCount}
               </p>
             </div>
             <div className="w-12 h-12 rounded-xl bg-[var(--green-light)] flex items-center justify-center">
@@ -108,19 +77,33 @@ export default function AdminPage() {
 
           {/* Section heading */}
           <h2 className="text-xl font-bold text-[var(--green-primary)] mb-4">
-            Agenda de hoy
+            Todas las reservaciones
           </h2>
 
-          {/* Reservation cards grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {reservations.map((res) => (
-              <ReservationCard
-                key={res.id}
-                {...res}
-                onCancel={() => handleCancel(res.id)}
-              />
-            ))}
-          </div>
+          {reservations.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-[var(--border)] p-12 text-center">
+              <p className="text-[var(--text-muted)]">No hay reservaciones todavía.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {reservations.map((res) => (
+                <ReservationCard
+                  key={res.id}
+                  name={res.fullName}
+                  email={res.email}
+                  visitType={getVisitTypeLabel(res.visitType)}
+                  date={res.date}
+                  time={res.time}
+                  status={res.status === "cancelled" ? "cancelled" : "confirmed"}
+                  onCancel={
+                    res.status !== "cancelled"
+                      ? () => handleCancel(res.id)
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
@@ -142,7 +125,7 @@ export default function AdminPage() {
             </h3>
             <p className="text-sm text-[var(--text-dark)] mb-6">
               ¿Deseas cancelar la reservación de{" "}
-              <strong>{cancellingReservation.name}</strong> para el día{" "}
+              <strong>{cancellingReservation.fullName}</strong> para el día{" "}
               {cancellingReservation.date} de {cancellingReservation.time}?
             </p>
             <div className="flex gap-3 justify-center">
@@ -150,13 +133,13 @@ export default function AdminPage() {
                 onClick={() => setShowModal(null)}
                 className="px-6 py-2 rounded-lg border border-[var(--border)] text-sm font-semibold text-[var(--text-dark)] hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                Cancelar
+                Volver
               </button>
               <button
                 onClick={confirmCancel}
                 className="px-6 py-2 rounded-lg bg-[var(--terracotta)] text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
               >
-                Continuar
+                Confirmar cancelación
               </button>
             </div>
           </div>
@@ -175,10 +158,10 @@ export default function AdminPage() {
               <SuccessIcon />
             </div>
             <h3 className="text-lg font-bold text-[var(--green-primary)] mb-2">
-              Agendamiento cancelado
+              Reservación cancelada
             </h3>
             <p className="text-sm text-[var(--text-dark)] mb-6">
-              En breve recibirás un correo de confirmación
+              La reservación ha sido cancelada exitosamente.
             </p>
             <button
               onClick={() => setShowSuccess(false)}

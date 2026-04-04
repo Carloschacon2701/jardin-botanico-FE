@@ -3,12 +3,27 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import BackButton from "@/components/atoms/BackButton";
+import { loginSchema, type LoginFormData } from "@/lib/schemas";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    console.log("Login:", data);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f8f6f6]">
@@ -73,13 +88,14 @@ export default function LoginPage() {
             </div>
 
             {/* Form */}
-            <form className="w-full flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="w-full flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
               <Input
                 label="Email Address"
                 type="email"
-                name="email"
                 placeholder="hello@botanical.com"
                 autoComplete="email"
+                {...register("email")}
+                error={errors.email?.message}
               />
 
               <div className="flex flex-col gap-2">
@@ -99,10 +115,11 @@ export default function LoginPage() {
                 </div>
                 <Input
                   type={showPassword ? "text" : "password"}
-                  name="password"
                   id="password"
                   placeholder="••••••••"
                   autoComplete="current-password"
+                  {...register("password")}
+                  error={errors.password?.message}
                   rightElement={
                     <button
                       type="button"

@@ -3,12 +3,27 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import BackButton from "@/components/atoms/BackButton";
+import { registerSchema, type RegisterFormData } from "@/lib/schemas";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = (data: RegisterFormData) => {
+    console.log("Register:", data);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f8f6f6]">
@@ -73,35 +88,34 @@ export default function RegisterPage() {
             </div>
 
             {/* Form */}
-            <form className="w-full flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="w-full flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
               <Input
                 label="Nombre completo"
                 type="text"
-                name="fullName"
                 placeholder="Enter your full name"
                 autoComplete="name"
-                rightElement={
-                  <UserIcon />
-                }
+                {...register("fullName")}
+                error={errors.fullName?.message}
+                rightElement={<UserIcon />}
               />
 
               <Input
                 label="Email"
                 type="email"
-                name="email"
                 placeholder="nature@example.com"
                 autoComplete="email"
-                rightElement={
-                  <MailIcon />
-                }
+                {...register("email")}
+                error={errors.email?.message}
+                rightElement={<MailIcon />}
               />
 
               <Input
                 label="Contraseña"
                 type={showPassword ? "text" : "password"}
-                name="password"
                 placeholder="••••••••"
                 autoComplete="new-password"
+                {...register("password")}
+                error={errors.password?.message}
                 rightElement={
                   <button
                     type="button"
@@ -117,12 +131,11 @@ export default function RegisterPage() {
               <Input
                 label="Confirmar contraseña"
                 type="password"
-                name="confirmPassword"
                 placeholder="••••••••"
                 autoComplete="new-password"
-                rightElement={
-                  <LockIcon />
-                }
+                {...register("confirmPassword")}
+                error={errors.confirmPassword?.message}
+                rightElement={<LockIcon />}
               />
 
               <div className="pt-4">

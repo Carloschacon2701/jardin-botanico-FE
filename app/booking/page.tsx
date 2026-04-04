@@ -1,26 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
+import { addReservation, type Reservation } from "@/lib/reservations";
+import { bookingSchema, type BookingFormData } from "@/lib/schemas";
 
 const visitTypes = [
   {
-    id: "guided",
+    id: "guided" as const,
     label: "Visita guiada",
     description: "Recorrido con guía experto por las áreas principales",
     icon: "🌿",
   },
   {
-    id: "educational",
+    id: "educational" as const,
     label: "Visita educativa",
     description: "Programa educativo para grupos escolares",
     icon: "📚",
   },
   {
-    id: "free",
+    id: "free" as const,
     label: "Recorrido libre",
     description: "Explora el jardín a tu propio ritmo",
     icon: "🚶",
@@ -28,11 +33,11 @@ const visitTypes = [
 ];
 
 const dates = [
-  { day: "Lun", date: 12, month: "May" },
-  { day: "Mar", date: 13, month: "May" },
-  { day: "Mié", date: 14, month: "May" },
-  { day: "Jue", date: 15, month: "May" },
-  { day: "Vie", date: 16, month: "May" },
+  { day: "Lun", date: 12, month: "May", full: "12 de Mayo, 2026" },
+  { day: "Mar", date: 13, month: "May", full: "13 de Mayo, 2026" },
+  { day: "Mié", date: 14, month: "May", full: "14 de Mayo, 2026" },
+  { day: "Jue", date: 15, month: "May", full: "15 de Mayo, 2026" },
+  { day: "Vie", date: 16, month: "May", full: "16 de Mayo, 2026" },
 ];
 
 const timeSlots = [
@@ -42,9 +47,38 @@ const timeSlots = [
 ];
 
 export default function BookingPage() {
-  const [selectedType, setSelectedType] = useState("guided");
+  const router = useRouter();
+  const [selectedType, setSelectedType] = useState<Reservation["visitType"]>("guided");
   const [selectedDate, setSelectedDate] = useState(0);
   const [selectedTime, setSelectedTime] = useState("1");
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<BookingFormData>({
+    resolver: zodResolver(bookingSchema),
+  });
+
+  const onSubmit = (data: BookingFormData) => {
+    const slot = timeSlots.find((s) => s.id === selectedTime)!;
+    addReservation({
+      fullName: data.fullName.trim(),
+      cedula: data.cedula.trim(),
+      email: data.email.trim(),
+      visitType: selectedType,
+      date: dates[selectedDate].full,
+      time: slot.time,
+    });
+    setShowSuccess(true);
+  };
+
+  const handleContinue = () => {
+    setShowSuccess(false);
+    router.push("/admin");
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
@@ -64,7 +98,6 @@ export default function BookingPage() {
             </p>
           </div>
 
-          {/* Desktop: split layout */}
           <div className="flex flex-col lg:grid lg:grid-cols-[472px_1fr] lg:gap-12">
             {/* Left: visitor form */}
             <div className="order-2 lg:order-1">
@@ -76,28 +109,30 @@ export default function BookingPage() {
                   </h2>
                 </div>
 
-                <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+                <div className="flex flex-col gap-5">
                   <Input
                     label="Nombre completo"
-                    name="fullName"
                     placeholder="e.g. Jane Doe"
                     autoComplete="name"
+                    {...register("fullName")}
+                    error={errors.fullName?.message}
                   />
                   <Input
-                    label="Cedula"
-                    name="cedula"
-                    placeholder="Documento de identidad"
+                    label="Cédula"
+                    placeholder="V-00000000"
+                    {...register("cedula")}
+                    error={errors.cedula?.message}
                   />
                   <Input
                     label="Email"
-                    name="email"
                     type="email"
                     placeholder="your@email.com"
                     autoComplete="email"
+                    {...register("email")}
+                    error={errors.email?.message}
                   />
-                </form>
+                </div>
 
-                {/* Info note */}
                 <div className="mt-6 flex gap-3 p-4 bg-[var(--green-light)]/30 rounded-xl border border-[var(--green-light)]">
                   <InfoIcon />
                   <p className="text-sm text-[var(--text-dark)] leading-relaxed">
@@ -108,7 +143,6 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* Desktop decorative image */}
               <div className="hidden lg:block relative h-48 rounded-2xl overflow-hidden">
                 <div className="absolute inset-0 bg-[var(--green-primary)]">
                   <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-primary)] to-transparent" />
@@ -226,8 +260,7 @@ export default function BookingPage() {
                 </div>
               </section>
 
-              {/* Submit */}
-              <Button size="lg" fullWidth>
+              <Button size="lg" fullWidth onClick={handleSubmit(onSubmit)}>
                 Reservar ahora
               </Button>
             </div>
@@ -236,6 +269,33 @@ export default function BookingPage() {
       </main>
 
       <Footer />
+
+      {/* Success modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-white rounded-2xl p-10 max-w-md w-full shadow-xl text-center">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-green-100 flex items-center justify-center">
+              <SuccessIcon />
+            </div>
+            <h3 className="text-xl font-bold text-[var(--green-primary)] mb-2">
+              Agendamiento exitoso
+            </h3>
+            <p className="text-sm text-[var(--text-dark)] mb-8 leading-relaxed">
+              Muchas gracias por agendar tu visita, <strong>{getValues("fullName")}</strong>.
+              <br />
+              En breve recibirás un correo de confirmación a{" "}
+              <strong>{getValues("email")}</strong>.
+            </p>
+            <button
+              onClick={handleContinue}
+              className="px-8 py-2.5 rounded-lg bg-[var(--green-primary)] text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -281,6 +341,15 @@ function InfoIcon() {
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--green-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
       <circle cx="10" cy="10" r="9" />
       <path d="M10 9V14M10 6.5V7" />
+    </svg>
+  );
+}
+
+function SuccessIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="text-green-600">
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 20L18 26L28 14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
