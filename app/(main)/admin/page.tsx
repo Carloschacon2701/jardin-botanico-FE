@@ -47,6 +47,10 @@ export default function AdminPage() {
   const [showModal, setShowModal] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [userId, setUserId] = useState<string>("");
+  const [showConfirmModal, setShowConfirmModal] = useState<number | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [showConfirmSuccess, setShowConfirmSuccess] = useState(false);
   const router = useRouter();
 
   const loadReservations = useCallback(async () => {
@@ -70,6 +74,7 @@ export default function AdminPage() {
         router.replace("/login");
         return;
       }
+      setUserId(session.user.id);
       setSessionChecked(true);
       loadReservations();
     });
@@ -101,8 +106,40 @@ export default function AdminPage() {
     loadReservations();
   };
 
+  const handleConfirmReservation = async (idReserva: number, idUsuario: string) => {
+    setIsConfirming(true);
+    const { error } = await supabase
+      .from("reservas")
+      .update({ id_estado: 2 })
+      .eq("id_reserva", idReserva);
+
+    if (!error) {
+      await supabase.from("historial_estados_reserva").insert({
+        id_reserva: idReserva,
+        id_usuario: idUsuario,
+        id_estado: 2,
+        comentario: "Reserva confirmada por el administrador",
+      });
+
+      setReservations((prev) =>
+        prev.map((r) =>
+          r.id_reserva === idReserva
+            ? { ...r, estados_reserva: { nombre_estado: "Confirmada" } }
+            : r
+        )
+      );
+      setShowConfirmModal(null);
+      setShowConfirmSuccess(true);
+    }
+    setIsConfirming(false);
+  };
+
   const cancellingReservation = reservations.find(
     (r) => r.id_reserva === showModal
+  );
+
+  const confirmingReservation = reservations.find(
+    (r) => r.id_reserva === showConfirmModal
   );
   const activeCount = reservations.filter(
     (r) => mapStatus(r.estados_reserva.nombre_estado) !== "cancelled"
@@ -171,6 +208,11 @@ export default function AdminPage() {
                     date={res.fecha_reserva}
                     time={time}
                     status={status}
+                    onConfirm={
+                      status === "pending"
+                        ? () => setShowConfirmModal(res.id_reserva)
+                        : undefined
+                    }
                     onCancel={
                       status !== "cancelled"
                         ? () => handleCancel(res.id_reserva)
@@ -221,6 +263,77 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Confirm reservation modal */}
+      {showConfirmModal && confirmingReservation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => !isConfirming && setShowConfirmModal(null)}
+          />
+          <div className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-xl text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+              <ConfirmIcon />
+            </div>
+            <h3 className="text-lg font-bold text-green-primary mb-2">
+              Confirmar reservación
+            </h3>
+            <p className="text-sm text-text-dark mb-6">
+              ¿Deseas confirmar la reservación de{" "}
+              <strong>
+                {confirmingReservation.usuarios.nombre}{" "}
+                {confirmingReservation.usuarios.apellido}
+              </strong>{" "}
+              para el día {confirmingReservation.fecha_reserva} de{" "}
+              {formatTo12h(confirmingReservation.bloques_horarios.hora_inicio)} -{" "}
+              {formatTo12h(confirmingReservation.bloques_horarios.hora_fin)}?
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowConfirmModal(null)}
+                disabled={isConfirming}
+                className="px-6 py-2 rounded-lg border border-border text-sm font-semibold text-text-dark hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Volver
+              </button>
+              <button
+                onClick={() => handleConfirmReservation(showConfirmModal, userId)}
+                disabled={isConfirming}
+                className="px-6 py-2 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isConfirming ? "Confirmando..." : "Confirmar reserva"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm success modal */}
+      {showConfirmSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowConfirmSuccess(false)}
+          />
+          <div className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-xl text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+              <SuccessIcon />
+            </div>
+            <h3 className="text-lg font-bold text-green-primary mb-2">
+              Reservación confirmada
+            </h3>
+            <p className="text-sm text-text-dark mb-6">
+              La reservación ha sido confirmada exitosamente.
+            </p>
+            <button
+              onClick={() => setShowConfirmSuccess(false)}
+              className="px-6 py-2 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Success modal */}
       {showSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -266,6 +379,27 @@ function CalendarCheckIcon() {
       <rect x="1" y="3" width="18" height="16" rx="2" />
       <path d="M14 1V5M6 1V5M1 9H19" />
       <path d="M7 14L10 17L17 10" />
+    </svg>
+  );
+}
+
+function ConfirmIcon() {
+  return (
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 40 40"
+      fill="none"
+      className="text-green-600"
+    >
+      <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M13 20L18 25L27 15"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

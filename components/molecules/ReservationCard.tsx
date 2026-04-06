@@ -8,6 +8,7 @@ interface ReservationCardProps {
   time: string;
   status: "confirmed" | "pending" | "cancelled";
   onCancel?: () => void;
+  onConfirm?: () => void;
 }
 
 const statusStyles = {
@@ -30,6 +31,7 @@ export default function ReservationCard({
   time,
   status,
   onCancel,
+  onConfirm,
 }: ReservationCardProps) {
   return (
     <div className="bg-white rounded-2xl border border-border p-5 shadow-sm hover:shadow-md transition-shadow">
@@ -72,13 +74,25 @@ export default function ReservationCard({
         </div>
       </div>
 
-      {status !== "cancelled" && onCancel && (
-        <button
-          onClick={onCancel}
-          className="w-full h-9 rounded-lg border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors cursor-pointer"
-        >
-          Cancelar reserva
-        </button>
+      {(status !== "cancelled") && (onCancel || onConfirm) && (
+        <div className="flex gap-2">
+          {status === "pending" && onConfirm && (
+            <button
+              onClick={onConfirm}
+              className="flex-1 h-9 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
+            >
+              Confirmar
+            </button>
+          )}
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="flex-1 h-9 rounded-lg border border-red-200 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
