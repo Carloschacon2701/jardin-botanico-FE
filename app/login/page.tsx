@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -9,9 +10,17 @@ import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import BackButton from "@/components/atoms/BackButton";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) router.replace("/");
+    });
+  }, [router]);
 
   const {
     register,
