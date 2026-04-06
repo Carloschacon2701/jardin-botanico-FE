@@ -3,15 +3,20 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import BackButton from "@/components/atoms/BackButton";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -21,8 +26,21 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log("Login:", data);
+  const onSubmit = async (data: LoginFormData) => {
+    setErrorMsg("");
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMsg("Credenciales incorrectas. Verifique su email y contraseña.");
+      return;
+    }
+
+    router.push("/admin");
   };
 
   return (
@@ -89,6 +107,12 @@ export default function LoginPage() {
 
             {/* Form */}
             <form className="w-full flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
+              {errorMsg && (
+                <div className="w-full rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+                  {errorMsg}
+                </div>
+              )}
+
               <Input
                 label="Email Address"
                 type="email"
@@ -133,8 +157,8 @@ export default function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" fullWidth size="lg">
-                Login
+              <Button type="submit" fullWidth size="lg" disabled={isLoading}>
+                {isLoading ? "Ingresando..." : "Login"}
               </Button>
             </form>
 

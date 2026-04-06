@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 import ReservationCard from "@/components/molecules/ReservationCard";
+import { supabase } from "@/lib/supabase";
 import {
   getReservations,
   cancelReservation,
@@ -16,6 +18,18 @@ export default function AdminPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [showModal, setShowModal] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
+      setSessionChecked(true);
+    });
+  }, [router]);
 
   const loadReservations = () => setReservations(getReservations());
 
@@ -23,6 +37,21 @@ export default function AdminPage() {
     seedDemoData();
     loadReservations();
   }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace("/login");
+  };
+
+  if (!sessionChecked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg">
+        <p className="text-lg text-[var(--green-primary)] font-semibold">
+          Cargando panel...
+        </p>
+      </div>
+    );
+  }
 
   const handleCancel = (id: string) => {
     setShowModal(id);
@@ -45,19 +74,27 @@ export default function AdminPage() {
       <main className="flex-1 w-full">
         <div className="mx-auto max-w-[1280px] px-4 md:px-10 py-8 md:py-12">
           {/* Summary header */}
-          <div className="mb-8">
-            <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
-                RESUMEN
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <div className="mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+                  RESUMEN
+                </p>
+                <h1 className="text-2xl md:text-3xl font-bold text-[var(--green-primary)]">
+                  Administración de reservaciones
+                </h1>
+              </div>
+              <p className="text-base text-[var(--text-dark)] max-w-lg">
+                Supervisión centralizada de todo el flujo de visitantes y los
+                programas educativos.
               </p>
-              <h1 className="text-2xl md:text-3xl font-bold text-[var(--green-primary)]">
-                Administración de reservaciones
-              </h1>
             </div>
-            <p className="text-base text-[var(--text-dark)] max-w-lg">
-              Supervisión centralizada de todo el flujo de visitantes y los
-              programas educativos.
-            </p>
+            <button
+              onClick={handleLogout}
+              className="shrink-0 ml-4 px-5 py-2 rounded-lg border border-[var(--border)] text-sm font-semibold text-[var(--terracotta)] hover:bg-[var(--terracotta)] hover:text-white transition-colors cursor-pointer"
+            >
+              Cerrar sesión
+            </button>
           </div>
 
           {/* Stats card */}
