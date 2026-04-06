@@ -1,23 +1,68 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ReservationCard from "@/components/molecules/ReservationCard";
 import { supabase } from "@/lib/supabase";
-import {
-  getReservations,
-  cancelReservation,
-  seedDemoData,
-  getVisitTypeLabel,
-  type Reservation,
-} from "@/lib/reservations";
+
+interface ReservaDB {
+  id_reserva: number;
+  fecha_reserva: string;
+  usuarios: {
+    nombre: string;
+    apellido: string;
+    cedula: string;
+    correo: string;
+  };
+  tipos_visita: {
+    nombre_visita: string;
+  };
+  bloques_horarios: {
+    hora_inicio: string;
+    hora_fin: string;
+  };
+  estados_reserva: {
+    nombre_estado: string;
+  };
+}
+
+function formatTo12h(time24: string): string {
+  const [h, m] = time24.split(":");
+  const hour = parseInt(h, 10);
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${m} ${suffix}`;
+}
+
+function mapStatus(nombre: string): "confirmed" | "pending" | "cancelled" {
+  const lower = nombre.toLowerCase();
+  if (lower.includes("cancel")) return "cancelled";
+  if (lower.includes("pendiente")) return "pending";
+  return "confirmed";
+}
 
 export default function AdminPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [showModal, setShowModal] = useState<string | null>(null);
+  const [reservations, setReservations] = useState<ReservaDB[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showModal, setShowModal] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [sessionChecked, setSessionChecked] = useState(false);
   const router = useRouter();
+
+  const loadReservations = useCallback(async () => {
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from("reservas")
+      .select(
+        "id_reserva, fecha_reserva, usuarios(nombre, apellido, cedula, correo), tipos_visita(nombre_visita), bloques_horarios(hora_inicio, hora_fin), estados_reserva(nombre_estado)"
+      )
+      .order("fecha_reserva", { ascending: false });
+
+    if (!error && data) {
+      setReservations(data as unknown as ReservaDB[]);
+    }
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -26,15 +71,9 @@ export default function AdminPage() {
         return;
       }
       setSessionChecked(true);
+      loadReservations();
     });
-  }, [router]);
-
-  const loadReservations = () => setReservations(getReservations());
-
-  useEffect(() => {
-    seedDemoData();
-    loadReservations();
-  }, []);
+  }, [router, loadReservations]);
 
   if (!sessionChecked) {
     return (
@@ -46,19 +85,28 @@ export default function AdminPage() {
     );
   }
 
-  const handleCancel = (id: string) => {
+  const handleCancel = (id: number) => {
     setShowModal(id);
   };
 
-  const confirmCancel = () => {
-    if (showModal) cancelReservation(showModal);
+  const confirmCancel = async () => {
+    if (showModal) {
+      await supabase
+        .from("reservas")
+        .update({ id_estado: 3 })
+        .eq("id_reserva", showModal);
+    }
     setShowModal(null);
     setShowSuccess(true);
     loadReservations();
   };
 
-  const cancellingReservation = reservations.find((r) => r.id === showModal);
-  const activeCount = reservations.filter((r) => r.status !== "cancelled").length;
+  const cancellingReservation = reservations.find(
+    (r) => r.id_reserva === showModal
+  );
+  const activeCount = reservations.filter(
+    (r) => mapStatus(r.estados_reserva.nombre_estado) !== "cancelled"
+  ).length;
 
   return (
     <>
@@ -100,28 +148,37 @@ export default function AdminPage() {
             Todas las reservaciones
           </h2>
 
-          {reservations.length === 0 ? (
+          {isLoading ? (
             <div className="bg-white rounded-2xl border border-[var(--border)] p-12 text-center">
-              <p className="text-[var(--text-muted)]">No hay reservaciones todavía.</p>
+              <p className="text-[var(--text-muted)]">Cargando reservaciones...</p>
+            </div>
+          ) : reservations.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-[var(--border)] p-12 text-center">
+              <p className="text-[var(--text-muted)]">Aún no hay reservaciones registradas.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {reservations.map((res) => (
-                <ReservationCard
-                  key={res.id}
-                  name={res.fullName}
-                  email={res.email}
-                  visitType={getVisitTypeLabel(res.visitType)}
-                  date={res.date}
-                  time={res.time}
-                  status={res.status === "cancelled" ? "cancelled" : "confirmed"}
-                  onCancel={
-                    res.status !== "cancelled"
-                      ? () => handleCancel(res.id)
-                      : undefined
-                  }
-                />
-              ))}
+              {reservations.map((res) => {
+                const status = mapStatus(res.estados_reserva.nombre_estado);
+                const fullName = `${res.usuarios.nombre} ${res.usuarios.apellido}`;
+                const time = `${formatTo12h(res.bloques_horarios.hora_inicio)} - ${formatTo12h(res.bloques_horarios.hora_fin)}`;
+                return (
+                  <ReservationCard
+                    key={res.id_reserva}
+                    name={fullName}
+                    email={res.usuarios.correo}
+                    visitType={res.tipos_visita.nombre_visita}
+                    date={res.fecha_reserva}
+                    time={time}
+                    status={status}
+                    onCancel={
+                      status !== "cancelled"
+                        ? () => handleCancel(res.id_reserva)
+                        : undefined
+                    }
+                  />
+                );
+              })}
             </div>
           )}
         </div>
@@ -143,8 +200,8 @@ export default function AdminPage() {
             </h3>
             <p className="text-sm text-[var(--text-dark)] mb-6">
               ¿Deseas cancelar la reservación de{" "}
-              <strong>{cancellingReservation.fullName}</strong> para el día{" "}
-              {cancellingReservation.date} de {cancellingReservation.time}?
+              <strong>{cancellingReservation.usuarios.nombre} {cancellingReservation.usuarios.apellido}</strong> para el día{" "}
+              {cancellingReservation.fecha_reserva} de {formatTo12h(cancellingReservation.bloques_horarios.hora_inicio)} - {formatTo12h(cancellingReservation.bloques_horarios.hora_fin)}?
             </p>
             <div className="flex gap-3 justify-center">
               <button
