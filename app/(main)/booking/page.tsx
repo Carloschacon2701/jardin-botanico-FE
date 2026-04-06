@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Navbar from "@/components/organisms/Navbar";
-import Footer from "@/components/organisms/Footer";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import { bookingSchema, type BookingFormData } from "@/lib/schemas";
@@ -181,15 +179,14 @@ export default function BookingPage() {
       setIsLoading(false);
     }
   };
+
   const handleContinue = () => {
     setShowSuccess(false);
     router.push("/admin");
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg">
-      <Navbar />
-
+    <>
       <main className="flex-1 w-full">
         <div className="mx-auto max-w-7xl px-4 md:px-10 py-8 md:py-12">
           {/* Page header */}
@@ -381,8 +378,6 @@ export default function BookingPage() {
         </div>
       </main>
 
-      <Footer />
-
       {/* Success modal */}
       {showSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -409,7 +404,7 @@ export default function BookingPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

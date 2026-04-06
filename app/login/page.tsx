@@ -79,9 +79,15 @@ export default function LoginPage() {
 
       {/* Right side - form */}
       <div className="flex-1 flex flex-col">
-        {/* Mobile header */}
-        <header className="p-4 lg:hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4">
           <BackButton />
+          <Link
+            href="/"
+            className="text-sm font-semibold text-[var(--green-primary)] hover:text-[var(--terracotta)] transition-colors no-underline"
+          >
+            Inicio
+          </Link>
         </header>
 
         <main className="flex-1 flex items-center justify-center px-6 pb-12 lg:px-16">

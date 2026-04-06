@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Logo from "@/components/atoms/Logo";
 import Button from "@/components/atoms/Button";
 import MobileSidebar from "@/components/organisms/MobileSidebar";
+import { supabase } from "@/lib/supabase";
 
 const navLinks = [
   { label: "Inicio", href: "/" },
@@ -14,6 +16,20 @@ const navLinks = [
 
 export default function Navbar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <>
@@ -36,9 +52,22 @@ export default function Navbar() {
 
           {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-4">
-            <Button href="/login" size="sm">
-              INICIAR SESION
-            </Button>
+            {isLoggedIn === null ? null : isLoggedIn ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  router.push("/login");
+                }}
+              >
+                CERRAR SESIÓN
+              </Button>
+            ) : (
+              <Button href="/login" size="sm" variant="outline">
+                INICIAR SESION
+              </Button>
+            )}
           </div>
 
           {/* Mobile hamburger */}
