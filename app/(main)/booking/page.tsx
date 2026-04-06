@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +8,7 @@ import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import { bookingSchema, type BookingFormData } from "@/lib/schemas";
 import { supabase } from "@/lib/supabase";
+import Holidays from "date-holidays";
 
 interface TipoVisita {
   id_tipo_visita: number;
@@ -40,13 +41,49 @@ const iconMap: Record<string, string> = {
   "School Trip": "📚",
 };
 
-const dates = [
-  { day: "Lun", date: 12, month: "May", full: "12 de Mayo, 2026" },
-  { day: "Mar", date: 13, month: "May", full: "13 de Mayo, 2026" },
-  { day: "Mié", date: 14, month: "May", full: "14 de Mayo, 2026" },
-  { day: "Jue", date: 15, month: "May", full: "15 de Mayo, 2026" },
-  { day: "Vie", date: 16, month: "May", full: "16 de Mayo, 2026" },
+const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const MONTH_NAMES = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
 ];
+
+interface DateOption {
+  day: string;
+  date: number;
+  month: string;
+  full: string;
+  iso: string;
+}
+
+function getNextBusinessDays(count: number): DateOption[] {
+  const hd = new Holidays("VE");
+  const results: DateOption[] = [];
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  cursor.setDate(cursor.getDate() + 1);
+
+  while (results.length < count) {
+    const dow = cursor.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    const isHoliday = !!hd.isHoliday(cursor);
+
+    if (!isWeekend && !isHoliday) {
+      const m = cursor.getMonth();
+      const d = cursor.getDate();
+      const y = cursor.getFullYear();
+      results.push({
+        day: DAY_NAMES[dow],
+        date: d,
+        month: MONTH_NAMES[m].slice(0, 3),
+        full: `${d} de ${MONTH_NAMES[m]}, ${y}`,
+        iso: `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`,
+      });
+    }
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return results;
+}
 
 
 export default function BookingPage() {
@@ -60,6 +97,7 @@ export default function BookingPage() {
 
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState(0);
+  const dates = useMemo(() => getNextBusinessDays(15), []);
 
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -111,8 +149,7 @@ export default function BookingPage() {
     const nombre = nameParts[0];
     const apellido = nameParts.slice(1).join(" ") || "N/A";
 
-    const diaNum = dates[selectedDate].date;
-    const formattedDate = `2026-05-${String(diaNum).padStart(2, '0')}`;
+    const formattedDate = dates[selectedDate].iso;
 
     try {
       let idUsuario = null;
@@ -257,8 +294,7 @@ export default function BookingPage() {
             </div>
 
             {/* Right: scheduling */}
-            <div className="order-1 lg:order-2 mb-8 lg:mb-0">
-              {/* Visit type */}
+            <div className="order-1 lg:order-2 mb-8 lg:mb-0 min-w-0">              {/* Visit type */}
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <TagIcon />
@@ -303,12 +339,12 @@ export default function BookingPage() {
                     Seleccione la fecha de su visita
                   </h3>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-2">
+                <div className="flex gap-3 overflow-x-auto pb-2 w-full min-w-0">
                   {dates.map((d, i) => (
                     <button
                       key={i}
                       onClick={() => setSelectedDate(i)}
-                      className={`flex flex-col items-center justify-center min-w-16 h-20 rounded-xl border-2 transition-all cursor-pointer ${selectedDate === i
+                      className={`flex flex-col items-center justify-center shrink-0 w-16 h-20 rounded-xl border-2 transition-all cursor-pointer ${selectedDate === i
                         ? "border-green-primary bg-green-primary text-white"
                         : "border-border bg-white hover:border-(--green-primary)/30 text-text-dark"
                         }`}
