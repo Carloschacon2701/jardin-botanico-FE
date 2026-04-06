@@ -42,7 +42,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
       {/* Sidebar panel */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-[312px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+        className={`fixed top-0 left-0 z-50 h-full w-78 bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
@@ -65,7 +65,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
-              className="text-[var(--green-primary)]"
+              className="text-green-primary"
             >
               <path d="M1 1L17 17M17 1L1 17" />
             </svg>
@@ -80,7 +80,7 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 <Link
                   href={link.href}
                   onClick={onClose}
-                  className="flex items-center gap-4 px-4 py-4 rounded-xl text-[var(--green-primary)] hover:bg-[var(--green-light)] transition-colors no-underline"
+                  className="flex items-center gap-4 px-4 py-4 rounded-xl text-green-primary hover:bg-green-light transition-colors no-underline"
                 >
                   <link.icon />
                   <span className="text-base font-medium">{link.label}</span>
@@ -103,8 +103,8 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="px-6 py-6 border-t border-[var(--border)]">
-          <button className="text-sm text-[var(--text-muted)] hover:text-[var(--green-primary)] transition-colors cursor-pointer w-full text-center">
+        <div className="px-6 py-6 border-t border-border">
+          <button className="text-sm text-text-muted hover:text-green-primary transition-colors cursor-pointer w-full text-center">
             Cerrar sesión
           </button>
         </div>

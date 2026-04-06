@@ -8,7 +8,7 @@ export default function BackButton() {
   return (
     <button
       onClick={() => router.back()}
-      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-[var(--green-light)] transition-colors cursor-pointer"
+      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-green-light transition-colors cursor-pointer"
       aria-label="Volver"
     >
       <svg

@@ -33,8 +33,8 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-[var(--bg)]/80 border-b border-[var(--border-green)]">
-        <nav className="mx-auto max-w-[1440px] flex items-center justify-between px-4 py-4 md:px-10 lg:px-[160px]">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-(--bg)/80 border-b border-(--border-green)">
+        <nav className="mx-auto max-w-360 flex items-center justify-between px-4 py-4 md:px-10 lg:px-40">
           <Logo />
 
           {/* Desktop nav links */}
@@ -43,7 +43,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-semibold text-[var(--green-primary)] hover:text-[var(--terracotta)] transition-colors no-underline"
+                className="text-sm font-semibold text-green-primary hover:text-terracotta transition-colors no-underline"
               >
                 {link.label}
               </Link>
@@ -76,9 +76,9 @@ export default function Navbar() {
             className="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5 cursor-pointer"
             aria-label="Abrir menú"
           >
-            <span className="block w-6 h-0.5 bg-[var(--green-primary)]" />
-            <span className="block w-6 h-0.5 bg-[var(--green-primary)]" />
-            <span className="block w-6 h-0.5 bg-[var(--green-primary)]" />
+            <span className="block w-6 h-0.5 bg-green-primary" />
+            <span className="block w-6 h-0.5 bg-green-primary" />
+            <span className="block w-6 h-0.5 bg-green-primary" />
           </button>
         </nav>
       </header>

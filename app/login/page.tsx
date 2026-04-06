@@ -3,20 +3,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import BackButton from "@/components/atoms/BackButton";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
-import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const {
     register,
@@ -26,28 +21,15 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    setErrorMsg("");
-    setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password,
-    });
-    setIsLoading(false);
-
-    if (error) {
-      setErrorMsg("Credenciales incorrectas. Verifique su email y contraseña.");
-      return;
-    }
-
-    router.push("/admin");
+  const onSubmit = (data: LoginFormData) => {
+    console.log("Login:", data);
   };
 
   return (
     <div className="flex min-h-screen bg-[#f8f6f6]">
       {/* Desktop left side - decorative image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
-        <div className="absolute inset-0 bg-[var(--green-primary)]">
+        <div className="absolute inset-0 bg-green-primary">
           <Image
             src="/images/hero-garden.png"
             alt=""
@@ -55,7 +37,7 @@ export default function LoginPage() {
             className="object-cover opacity-60"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-primary)] via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-green-primary via-transparent to-transparent" />
         </div>
         <div className="relative z-10 flex flex-col justify-end p-12 text-white">
           <div className="flex items-center gap-3 mb-4">
@@ -79,19 +61,13 @@ export default function LoginPage() {
 
       {/* Right side - form */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4">
+        {/* Mobile header */}
+        <header className="p-4 lg:hidden">
           <BackButton />
-          <Link
-            href="/"
-            className="text-sm font-semibold text-[var(--green-primary)] hover:text-[var(--terracotta)] transition-colors no-underline"
-          >
-            Inicio
-          </Link>
         </header>
 
         <main className="flex-1 flex items-center justify-center px-6 pb-12 lg:px-16">
-          <div className="w-full max-w-[400px] flex flex-col items-center">
+          <div className="w-full max-w-100 flex flex-col items-center">
             {/* Icon + heading */}
             <div className="flex flex-col items-center mb-8">
               <div className="w-24 h-24 rounded-full bg-[rgba(45,106,79,0.1)] flex items-center justify-center mb-6">
@@ -103,22 +79,16 @@ export default function LoginPage() {
                   aria-hidden="true"
                 />
               </div>
-              <h1 className="text-3xl font-bold text-[var(--green-primary)] tracking-tight mb-2">
+              <h1 className="text-3xl font-bold text-green-primary tracking-tight mb-2">
                 ¡Bienvenido!
               </h1>
-              <p className="text-base text-[var(--green-primary)]/70 text-center">
+              <p className="text-base text-(--green-primary)/70 text-center">
                 Ingrese sus datos para acceder a su cuenta
               </p>
             </div>
 
             {/* Form */}
             <form className="w-full flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-              {errorMsg && (
-                <div className="w-full rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
-                  {errorMsg}
-                </div>
-              )}
-
               <Input
                 label="Email Address"
                 type="email"
@@ -132,13 +102,13 @@ export default function LoginPage() {
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="password"
-                    className="text-sm font-semibold text-[var(--green-primary)] tracking-wide"
+                    className="text-sm font-semibold text-green-primary tracking-wide"
                   >
                     Password
                   </label>
                   <Link
                     href="#"
-                    className="text-xs font-medium text-[var(--terracotta)] hover:underline no-underline"
+                    className="text-xs font-medium text-terracotta hover:underline no-underline"
                   >
                     Forgot password?
                   </Link>
@@ -154,7 +124,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-[var(--text-muted)] hover:text-[var(--green-primary)] transition-colors cursor-pointer"
+                      className="text-text-muted hover:text-green-primary transition-colors cursor-pointer"
                       aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
                       <EyeIcon open={showPassword} />
@@ -163,18 +133,18 @@ export default function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" fullWidth size="lg" disabled={isLoading}>
-                {isLoading ? "Ingresando..." : "Login"}
+              <Button type="submit" fullWidth size="lg">
+                Login
               </Button>
             </form>
 
             {/* Divider */}
             <div className="flex items-center gap-4 w-full mt-8">
-              <div className="flex-1 h-px bg-[var(--border-green)]" />
-              <span className="text-sm text-[var(--green-primary)]/40">
+              <div className="flex-1 h-px bg-(--border-green)" />
+              <span className="text-sm text-(--green-primary)/40">
                 o inicia con
               </span>
-              <div className="flex-1 h-px bg-[var(--border-green)]" />
+              <div className="flex-1 h-px bg-(--border-green)" />
             </div>
 
             {/* Social buttons */}
@@ -199,12 +169,12 @@ export default function LoginPage() {
 
             {/* Footer link */}
             <div className="mt-10 text-center text-sm">
-              <span className="text-[var(--text-dark)]">
+              <span className="text-text-dark">
                 No tiene una cuenta?{" "}
               </span>
               <Link
                 href="/register"
-                className="font-bold text-[var(--green-primary)] hover:underline no-underline"
+                className="font-bold text-green-primary hover:underline no-underline"
               >
                 Registrarse
               </Link>

@@ -26,7 +26,7 @@ export default function Logo({ size = "md", showText = true }: LogoProps) {
       />
       {showText && (
         <span
-          className={`font-bold text-[var(--green-primary)] tracking-tight ${text}`}
+          className={`font-bold text-green-primary tracking-tight ${text}`}
         >
           Jardin Botanico UNET
         </span>

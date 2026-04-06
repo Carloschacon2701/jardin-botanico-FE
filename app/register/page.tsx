@@ -29,7 +29,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen bg-[#f8f6f6]">
       {/* Desktop left side - decorative image */}
       <div className="hidden lg:flex lg:w-1/2 relative">
-        <div className="absolute inset-0 bg-[var(--green-primary)]">
+        <div className="absolute inset-0 bg-green-primary">
           <Image
             src="/images/hero-garden.png"
             alt=""
@@ -37,7 +37,7 @@ export default function RegisterPage() {
             className="object-cover opacity-60"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--green-primary)] via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-green-primary via-transparent to-transparent" />
         </div>
         <div className="relative z-10 flex flex-col justify-end p-12 text-white">
           <div className="flex items-center gap-3 mb-4">
@@ -61,19 +61,13 @@ export default function RegisterPage() {
 
       {/* Right side - form */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="flex items-center justify-between p-4">
+        {/* Mobile header */}
+        <header className="p-4 lg:hidden">
           <BackButton />
-          <Link
-            href="/"
-            className="text-sm font-semibold text-[var(--green-primary)] hover:text-[var(--terracotta)] transition-colors no-underline"
-          >
-            Inicio
-          </Link>
         </header>
 
         <main className="flex-1 flex items-center justify-center px-6 pb-12 lg:px-16">
-          <div className="w-full max-w-[448px] lg:bg-white lg:rounded-3xl lg:shadow-lg lg:p-12 flex flex-col items-center">
+          <div className="w-full max-w-md lg:bg-white lg:rounded-3xl lg:shadow-lg lg:p-12 flex flex-col items-center">
             {/* Icon + heading */}
             <div className="flex flex-col items-center mb-8">
               <div className="w-24 h-24 rounded-full bg-[rgba(45,106,79,0.1)] flex items-center justify-center mb-6">
@@ -85,10 +79,10 @@ export default function RegisterPage() {
                   aria-hidden="true"
                 />
               </div>
-              <h1 className="text-3xl font-bold text-[var(--green-primary)] tracking-tight mb-2">
+              <h1 className="text-3xl font-bold text-green-primary tracking-tight mb-2">
                 ¡Únete a nosotros!
               </h1>
-              <p className="text-base text-[var(--green-primary)]/70 text-center">
+              <p className="text-base text-(--green-primary)/70 text-center">
                 Ingrese sus datos para crear su cuenta
               </p>
             </div>
@@ -126,7 +120,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-[var(--text-muted)] hover:text-[var(--green-primary)] transition-colors cursor-pointer"
+                    className="text-text-muted hover:text-green-primary transition-colors cursor-pointer"
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     <EyeIcon />
@@ -153,12 +147,12 @@ export default function RegisterPage() {
 
             {/* Footer link */}
             <div className="mt-8 text-center text-sm">
-              <span className="text-[var(--text-dark)]">
+              <span className="text-text-dark">
                 Ya tienes una cuenta?{" "}
               </span>
               <Link
                 href="/login"
-                className="font-bold text-[var(--green-primary)] hover:underline no-underline"
+                className="font-bold text-green-primary hover:underline no-underline"
               >
                 Iniciar sesión
               </Link>

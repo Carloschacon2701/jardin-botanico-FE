@@ -53,15 +53,15 @@ export default function SpeciesCarousel() {
   };
 
   return (
-    <section className="w-full py-12 md:py-16 bg-[var(--green-bg-subtle)] overflow-hidden">
-      <div className="mx-auto max-w-[1440px] px-4 md:px-10 lg:px-[160px]">
+    <section className="w-full py-12 md:py-16 bg-(--green-bg-subtle) overflow-hidden">
+      <div className="mx-auto max-w-360 px-4 md:px-10 lg:px-40">
         {/* Header */}
         <div className="flex items-end justify-between mb-8 md:mb-10">
           <div className="flex flex-col gap-2 max-w-2xl">
-            <h2 className="text-2xl md:text-4xl font-bold text-[var(--green-primary)] tracking-tight">
+            <h2 className="text-2xl md:text-4xl font-bold text-green-primary tracking-tight">
               Descubre cada uno de nuestros espacios
             </h2>
-            <p className="text-base md:text-lg text-[var(--text-dark)]">
+            <p className="text-base md:text-lg text-text-dark">
               Diverse ecosystems carefully maintained for conservation and
               education.
             </p>
@@ -71,7 +71,7 @@ export default function SpeciesCarousel() {
           <div className="hidden md:flex gap-2">
             <button
               onClick={() => scroll("left")}
-              className="w-9 h-9 rounded-full border border-[var(--border-green-light)] flex items-center justify-center hover:bg-[var(--green-light)] transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full border border-(--border-green-light) flex items-center justify-center hover:bg-green-light transition-colors cursor-pointer"
               aria-label="Anterior"
             >
               <svg
@@ -89,7 +89,7 @@ export default function SpeciesCarousel() {
             </button>
             <button
               onClick={() => scroll("right")}
-              className="w-9 h-9 rounded-full border border-[var(--border-green-light)] flex items-center justify-center hover:bg-[var(--green-light)] transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full border border-(--border-green-light) flex items-center justify-center hover:bg-green-light transition-colors cursor-pointer"
               aria-label="Siguiente"
             >
               <svg

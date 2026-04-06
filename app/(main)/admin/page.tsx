@@ -78,7 +78,7 @@ export default function AdminPage() {
   if (!sessionChecked) {
     return (
       <main className="flex flex-1 items-center justify-center">
-        <p className="text-lg text-[var(--green-primary)] font-semibold">
+        <p className="text-lg text-green-primary font-semibold">
           Cargando panel...
         </p>
       </main>
@@ -111,50 +111,50 @@ export default function AdminPage() {
   return (
     <>
       <main className="flex-1 w-full">
-        <div className="mx-auto max-w-[1280px] px-4 md:px-10 py-8 md:py-12">
+        <div className="mx-auto max-w-7xl px-4 md:px-10 py-8 md:py-12">
           {/* Summary header */}
           <div className="mb-8">
             <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">
                 RESUMEN
               </p>
-              <h1 className="text-2xl md:text-3xl font-bold text-[var(--green-primary)]">
+              <h1 className="text-2xl md:text-3xl font-bold text-green-primary">
                 Administración de reservaciones
               </h1>
             </div>
-            <p className="text-base text-[var(--text-dark)] max-w-lg">
+            <p className="text-base text-text-dark max-w-lg">
               Supervisión centralizada de todo el flujo de visitantes y los
               programas educativos.
             </p>
           </div>
 
           {/* Stats card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-[var(--border)] p-6 mb-8 flex items-center justify-between max-w-sm">
+          <div className="bg-white rounded-2xl shadow-sm border border-border p-6 mb-8 flex items-center justify-between max-w-sm">
             <div>
-              <p className="text-sm text-[var(--text-muted)] mb-1">
+              <p className="text-sm text-text-muted mb-1">
                 Reservaciones activas
               </p>
-              <p className="text-4xl font-bold text-[var(--green-primary)]">
+              <p className="text-4xl font-bold text-green-primary">
                 {activeCount}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-[var(--green-light)] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-green-light flex items-center justify-center">
               <CalendarCheckIcon />
             </div>
           </div>
 
           {/* Section heading */}
-          <h2 className="text-xl font-bold text-[var(--green-primary)] mb-4">
+          <h2 className="text-xl font-bold text-green-primary mb-4">
             Todas las reservaciones
           </h2>
 
           {isLoading ? (
-            <div className="bg-white rounded-2xl border border-[var(--border)] p-12 text-center">
-              <p className="text-[var(--text-muted)]">Cargando reservaciones...</p>
+            <div className="bg-white rounded-2xl border border-border p-12 text-center">
+              <p className="text-text-muted">Cargando reservaciones...</p>
             </div>
           ) : reservations.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[var(--border)] p-12 text-center">
-              <p className="text-[var(--text-muted)]">Aún no hay reservaciones registradas.</p>
+            <div className="bg-white rounded-2xl border border-border p-12 text-center">
+              <p className="text-text-muted">Aún no hay reservaciones registradas.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -195,10 +195,10 @@ export default function AdminPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-100 flex items-center justify-center">
               <WarningIcon />
             </div>
-            <h3 className="text-lg font-bold text-[var(--green-primary)] mb-2">
+            <h3 className="text-lg font-bold text-green-primary mb-2">
               Confirmar cancelación de visita
             </h3>
-            <p className="text-sm text-[var(--text-dark)] mb-6">
+            <p className="text-sm text-text-dark mb-6">
               ¿Deseas cancelar la reservación de{" "}
               <strong>{cancellingReservation.usuarios.nombre} {cancellingReservation.usuarios.apellido}</strong> para el día{" "}
               {cancellingReservation.fecha_reserva} de {formatTo12h(cancellingReservation.bloques_horarios.hora_inicio)} - {formatTo12h(cancellingReservation.bloques_horarios.hora_fin)}?
@@ -206,13 +206,13 @@ export default function AdminPage() {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => setShowModal(null)}
-                className="px-6 py-2 rounded-lg border border-[var(--border)] text-sm font-semibold text-[var(--text-dark)] hover:bg-gray-50 transition-colors cursor-pointer"
+                className="px-6 py-2 rounded-lg border border-border text-sm font-semibold text-text-dark hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 Volver
               </button>
               <button
                 onClick={confirmCancel}
-                className="px-6 py-2 rounded-lg bg-[var(--terracotta)] text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
+                className="px-6 py-2 rounded-lg bg-terracotta text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
               >
                 Confirmar cancelación
               </button>
@@ -232,15 +232,15 @@ export default function AdminPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
               <SuccessIcon />
             </div>
-            <h3 className="text-lg font-bold text-[var(--green-primary)] mb-2">
+            <h3 className="text-lg font-bold text-green-primary mb-2">
               Reservación cancelada
             </h3>
-            <p className="text-sm text-[var(--text-dark)] mb-6">
+            <p className="text-sm text-text-dark mb-6">
               La reservación ha sido cancelada exitosamente.
             </p>
             <button
               onClick={() => setShowSuccess(false)}
-              className="px-6 py-2 rounded-lg bg-[var(--green-primary)] text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
+              className="px-6 py-2 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
             >
               Continuar
             </button>

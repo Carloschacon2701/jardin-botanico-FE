@@ -32,10 +32,10 @@ export default function ReservationCard({
   onCancel,
 }: ReservationCardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-[var(--border)] p-5 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-2xl border border-border p-5 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[var(--green-light)] flex items-center justify-center text-[var(--green-primary)] font-bold text-sm">
+          <div className="w-10 h-10 rounded-full bg-green-light flex items-center justify-center text-green-primary font-bold text-sm">
             {name
               .split(" ")
               .map((n) => n[0])
@@ -44,10 +44,10 @@ export default function ReservationCard({
               .toUpperCase()}
           </div>
           <div>
-            <h3 className="font-bold text-[var(--green-primary)] text-sm">
+            <h3 className="font-bold text-green-primary text-sm">
               {name}
             </h3>
-            <p className="text-xs text-[var(--text-muted)]">{email}</p>
+            <p className="text-xs text-text-muted">{email}</p>
           </div>
         </div>
         <span
@@ -58,15 +58,15 @@ export default function ReservationCard({
       </div>
 
       <div className="flex flex-col gap-2 mb-4">
-        <div className="flex items-center gap-2 text-sm text-[var(--text-dark)]">
+        <div className="flex items-center gap-2 text-sm text-text-dark">
           <TagIcon />
           <span>{visitType}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-[var(--text-dark)]">
+        <div className="flex items-center gap-2 text-sm text-text-dark">
           <CalendarIcon />
           <span>{date}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-[var(--text-dark)]">
+        <div className="flex items-center gap-2 text-sm text-text-dark">
           <ClockIcon />
           <span>{time}</span>
         </div>
