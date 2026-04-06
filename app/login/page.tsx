@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@/components/atoms/Input";
@@ -14,13 +14,9 @@ import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace("/");
-    });
-  }, [router]);
 
   const {
     register,
@@ -30,8 +26,21 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log("Login:", data);
+  const onSubmit = async (data: LoginFormData) => {
+    setErrorMsg("");
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    });
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMsg("Credenciales incorrectas. Verifique su email y contraseña.");
+      return;
+    }
+
+    router.push("/admin");
   };
 
   return (
@@ -70,9 +79,15 @@ export default function LoginPage() {
 
       {/* Right side - form */}
       <div className="flex-1 flex flex-col">
-        {/* Mobile header */}
-        <header className="p-4 lg:hidden">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4">
           <BackButton />
+          <Link
+            href="/"
+            className="text-sm font-semibold text-green-primary hover:text-terracotta transition-colors no-underline"
+          >
+            Inicio
+          </Link>
         </header>
 
         <main className="flex-1 flex items-center justify-center px-6 pb-12 lg:px-16">
@@ -98,6 +113,12 @@ export default function LoginPage() {
 
             {/* Form */}
             <form className="w-full flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
+              {errorMsg && (
+                <div className="w-full rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+                  {errorMsg}
+                </div>
+              )}
+
               <Input
                 label="Email Address"
                 type="email"
@@ -142,8 +163,8 @@ export default function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" fullWidth size="lg">
-                Login
+              <Button type="submit" fullWidth size="lg" disabled={isLoading}>
+                {isLoading ? "Ingresando..." : "Login"}
               </Button>
             </form>
 

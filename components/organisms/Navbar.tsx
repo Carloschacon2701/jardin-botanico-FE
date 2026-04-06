@@ -1,35 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/atoms/Logo";
 import Button from "@/components/atoms/Button";
 import MobileSidebar from "@/components/organisms/MobileSidebar";
+import { useAuth } from "@/app/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
-const navLinks = [
+const baseNavLinks = [
   { label: "Inicio", href: "/" },
   { label: "Agendar Visita", href: "/booking" },
-  { label: "Admin Panel", href: "/admin" },
 ];
 
 export default function Navbar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const { session, userRole, isLoading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const navLinks = [
+    ...baseNavLinks,
+    ...(userRole === 1 ? [{ label: "Admin Panel", href: "/admin" }] : []),
+  ];
 
   return (
     <>
@@ -52,7 +45,9 @@ export default function Navbar() {
 
           {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-4">
-            {isLoggedIn === null ? null : isLoggedIn ? (
+            {isLoading ? (
+              <div className="h-9 w-32 rounded-lg bg-gray-200 animate-pulse" />
+            ) : session ? (
               <Button
                 size="sm"
                 variant="outline"

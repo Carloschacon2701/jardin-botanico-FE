@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Public_Sans } from "next/font/google";
+import { AuthProvider } from "@/app/context/AuthContext";
 import "./globals.css";
 
 const publicSans = Public_Sans({
@@ -21,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${publicSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

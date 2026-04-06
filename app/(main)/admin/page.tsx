@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ReservationCard from "@/components/molecules/ReservationCard";
+import { useAuth } from "@/app/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
 interface ReservaDB {
@@ -26,6 +27,14 @@ interface ReservaDB {
   };
 }
 
+interface VisitorDB {
+  id_usuario: string;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  cedula: string;
+}
+
 function formatTo12h(time24: string): string {
   const [h, m] = time24.split(":");
   const hour = parseInt(h, 10);
@@ -46,13 +55,16 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [sessionChecked, setSessionChecked] = useState(false);
-  const [userId, setUserId] = useState<string>("");
   const [showConfirmModal, setShowConfirmModal] = useState<number | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [showConfirmSuccess, setShowConfirmSuccess] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Todas");
+  const [activeTab, setActiveTab] = useState<"reservas" | "usuarios">("reservas");
+  const [visitors, setVisitors] = useState<VisitorDB[]>([]);
+  const [isLoadingVisitors, setIsLoadingVisitors] = useState(false);
+  const [promotingId, setPromotingId] = useState<string | null>(null);
   const router = useRouter();
+  const { session, userRole, isLoading: authLoading } = useAuth();
 
   const loadReservations = useCallback(async () => {
     setIsLoading(true);
@@ -69,19 +81,30 @@ export default function AdminPage() {
     setIsLoading(false);
   }, []);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        router.replace("/login");
-        return;
-      }
-      setUserId(session.user.id);
-      setSessionChecked(true);
-      loadReservations();
-    });
-  }, [router, loadReservations]);
+  const loadVisitors = useCallback(async () => {
+    setIsLoadingVisitors(true);
+    const { data, error } = await supabase
+      .from("usuarios")
+      .select("id_usuario, nombre, apellido, correo, cedula")
+      .eq("id_rol", 2);
 
-  if (!sessionChecked) {
+    if (!error && data) {
+      setVisitors(data as VisitorDB[]);
+    }
+    setIsLoadingVisitors(false);
+  }, []);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!session || userRole !== 1) {
+      router.replace("/");
+      return;
+    }
+    loadReservations();
+    loadVisitors();
+  }, [authLoading, session, userRole, router, loadReservations, loadVisitors]);
+
+  if (authLoading || !session || userRole !== 1) {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="text-lg text-green-primary font-semibold">
@@ -135,6 +158,19 @@ export default function AdminPage() {
     setIsConfirming(false);
   };
 
+  const handlePromoteToAdmin = async (idUsuario: string) => {
+    setPromotingId(idUsuario);
+    const { error } = await supabase
+      .from("usuarios")
+      .update({ id_rol: 1 })
+      .eq("id_usuario", idUsuario);
+
+    if (!error) {
+      setVisitors((prev) => prev.filter((v) => v.id_usuario !== idUsuario));
+    }
+    setPromotingId(null);
+  };
+
   const cancellingReservation = reservations.find(
     (r) => r.id_reserva === showModal
   );
@@ -156,8 +192,8 @@ export default function AdminPage() {
     activeFilter === "Todas"
       ? reservations
       : reservations.filter(
-          (r) => mapStatus(r.estados_reserva.nombre_estado) === STATUS_MAP[activeFilter]
-        );
+        (r) => mapStatus(r.estados_reserva.nombre_estado) === STATUS_MAP[activeFilter]
+      );
 
   return (
     <>
@@ -179,84 +215,169 @@ export default function AdminPage() {
             </p>
           </div>
 
-          {/* Stats card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-border p-6 mb-8 flex items-center justify-between max-w-sm">
-            <div>
-              <p className="text-sm text-text-muted mb-1">
-                Reservaciones activas
-              </p>
-              <p className="text-4xl font-bold text-green-primary">
-                {activeCount}
-              </p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-green-light flex items-center justify-center">
-              <CalendarCheckIcon />
-            </div>
-          </div>
-
-          {/* Section heading */}
-          <h2 className="text-xl font-bold text-green-primary mb-4">
-            Todas las reservaciones
-          </h2>
-
-          {/* Filter bar */}
-          <div className="flex gap-2 overflow-x-auto pb-1 mb-6">
-            {FILTER_OPTIONS.map((option) => (
-              <button
-                key={option}
-                onClick={() => setActiveFilter(option)}
-                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
-                  activeFilter === option
-                    ? "bg-green-primary text-white"
-                    : "border border-border text-text-dark bg-white hover:bg-gray-50"
+          {/* Tabs */}
+          <div className="flex gap-1 border-b border-border mb-8">
+            <button
+              onClick={() => setActiveTab("reservas")}
+              className={`px-5 py-3 text-sm font-semibold transition-colors cursor-pointer border-b-2 -mb-px ${activeTab === "reservas"
+                  ? "border-green-primary text-green-primary"
+                  : "border-transparent text-text-muted hover:text-green-primary"
                 }`}
-              >
-                {option}
-              </button>
-            ))}
+            >
+              Reservaciones
+            </button>
+            <button
+              onClick={() => setActiveTab("usuarios")}
+              className={`px-5 py-3 text-sm font-semibold transition-colors cursor-pointer border-b-2 -mb-px ${activeTab === "usuarios"
+                  ? "border-green-primary text-green-primary"
+                  : "border-transparent text-text-muted hover:text-green-primary"
+                }`}
+            >
+              Gestión de Usuarios
+            </button>
           </div>
 
-          {isLoading ? (
-            <div className="bg-white rounded-2xl border border-border p-12 text-center">
-              <p className="text-text-muted">Cargando reservaciones...</p>
-            </div>
-          ) : reservations.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-border p-12 text-center">
-              <p className="text-text-muted">Aún no hay reservaciones registradas.</p>
-            </div>
-          ) : filteredReservations.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-border p-12 text-center">
-              <p className="text-text-muted">No hay reservaciones para este filtro.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filteredReservations.map((res) => {
-                const status = mapStatus(res.estados_reserva.nombre_estado);
-                const fullName = `${res.usuarios.nombre} ${res.usuarios.apellido}`;
-                const time = `${formatTo12h(res.bloques_horarios.hora_inicio)} - ${formatTo12h(res.bloques_horarios.hora_fin)}`;
-                return (
-                  <ReservationCard
-                    key={res.id_reserva}
-                    name={fullName}
-                    email={res.usuarios.correo}
-                    visitType={res.tipos_visita.nombre_visita}
-                    date={res.fecha_reserva}
-                    time={time}
-                    status={status}
-                    onConfirm={
-                      status === "pending"
-                        ? () => setShowConfirmModal(res.id_reserva)
-                        : undefined
-                    }
-                    onCancel={
-                      status !== "cancelled"
-                        ? () => handleCancel(res.id_reserva)
-                        : undefined
-                    }
-                  />
-                );
-              })}
-            </div>
+          {/* Tab: Reservaciones */}
+          {activeTab === "reservas" && (
+            <>
+              {/* Stats card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-border p-6 mb-8 flex items-center justify-between max-w-sm">
+                <div>
+                  <p className="text-sm text-text-muted mb-1">
+                    Reservaciones activas
+                  </p>
+                  <p className="text-4xl font-bold text-green-primary">
+                    {activeCount}
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-xl bg-green-light flex items-center justify-center">
+                  <CalendarCheckIcon />
+                </div>
+              </div>
+
+              {/* Section heading */}
+              <h2 className="text-xl font-bold text-green-primary mb-4">
+                Todas las reservaciones
+              </h2>
+
+              {/* Filter bar */}
+              <div className="flex gap-2 overflow-x-auto pb-1 mb-6">
+                {FILTER_OPTIONS.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setActiveFilter(option)}
+                    className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer ${activeFilter === option
+                        ? "bg-green-primary text-white"
+                        : "border border-border text-text-dark bg-white hover:bg-gray-50"
+                      }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+
+              {isLoading ? (
+                <div className="bg-white rounded-2xl border border-border p-12 text-center">
+                  <p className="text-text-muted">Cargando reservaciones...</p>
+                </div>
+              ) : reservations.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-border p-12 text-center">
+                  <p className="text-text-muted">Aún no hay reservaciones registradas.</p>
+                </div>
+              ) : filteredReservations.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-border p-12 text-center">
+                  <p className="text-text-muted">No hay reservaciones para este filtro.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {filteredReservations.map((res) => {
+                    const status = mapStatus(res.estados_reserva.nombre_estado);
+                    const fullName = `${res.usuarios.nombre} ${res.usuarios.apellido}`;
+                    const time = `${formatTo12h(res.bloques_horarios.hora_inicio)} - ${formatTo12h(res.bloques_horarios.hora_fin)}`;
+                    return (
+                      <ReservationCard
+                        key={res.id_reserva}
+                        name={fullName}
+                        email={res.usuarios.correo}
+                        visitType={res.tipos_visita.nombre_visita}
+                        date={res.fecha_reserva}
+                        time={time}
+                        status={status}
+                        onConfirm={
+                          status === "pending"
+                            ? () => setShowConfirmModal(res.id_reserva)
+                            : undefined
+                        }
+                        onCancel={
+                          status !== "cancelled"
+                            ? () => handleCancel(res.id_reserva)
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Tab: Gestión de Usuarios */}
+          {activeTab === "usuarios" && (
+            <>
+              <h2 className="text-xl font-bold text-green-primary mb-2">
+                Visitantes registrados
+              </h2>
+              <p className="text-sm text-text-muted mb-6">
+                Promueve visitantes a administradores del sistema.
+              </p>
+
+              {isLoadingVisitors ? (
+                <div className="bg-white rounded-2xl border border-border p-12 text-center">
+                  <p className="text-text-muted">Cargando visitantes...</p>
+                </div>
+              ) : visitors.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-border p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(45,106,79,0.1)] flex items-center justify-center">
+                    <UsersIcon />
+                  </div>
+                  <p className="text-text-muted font-semibold">No hay visitantes por promover</p>
+                  <p className="text-sm text-text-muted mt-1">Todos los usuarios ya tienen rol de administrador.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {visitors.map((v) => (
+                    <div
+                      key={v.id_usuario}
+                      className="bg-white rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[rgba(45,106,79,0.1)] flex items-center justify-center shrink-0">
+                          <span className="text-sm font-bold text-green-primary">
+                            {v.nombre.charAt(0)}{v.apellido.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-green-primary truncate">
+                            {v.nombre} {v.apellido}
+                          </p>
+                          <p className="text-xs text-text-muted truncate">{v.correo}</p>
+                        </div>
+                      </div>
+                      <div className="text-xs text-text-dark">
+                        <span className="font-semibold">Cédula:</span> {v.cedula}
+                      </div>
+                      <button
+                        onClick={() => handlePromoteToAdmin(v.id_usuario)}
+                        disabled={promotingId === v.id_usuario}
+                        className="w-full py-2.5 rounded-xl bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {promotingId === v.id_usuario ? "Promoviendo..." : "Convertir en Admin"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
@@ -331,7 +452,7 @@ export default function AdminPage() {
                 Volver
               </button>
               <button
-                onClick={() => handleConfirmReservation(showConfirmModal, userId)}
+                onClick={() => handleConfirmReservation(showConfirmModal, session.user.id)}
                 disabled={isConfirming}
                 className="px-6 py-2 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
               >
@@ -483,6 +604,26 @@ function SuccessIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function UsersIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="var(--green-primary)"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="9" cy="7" r="4" />
+      <path d="M3 21V19C3 16.7909 4.79086 15 7 15H11C13.2091 15 15 16.7909 15 19V21" />
+      <path d="M16 3.13C17.7699 3.58392 19.0078 5.17927 19.0078 7.005C19.0078 8.83073 17.7699 10.4261 16 10.88" />
+      <path d="M21 21V19C20.9949 17.1826 19.7652 15.5942 18 15.13" />
     </svg>
   );
 }
