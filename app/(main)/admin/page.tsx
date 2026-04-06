@@ -51,6 +51,7 @@ export default function AdminPage() {
   const [showConfirmModal, setShowConfirmModal] = useState<number | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [showConfirmSuccess, setShowConfirmSuccess] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("Todas");
   const router = useRouter();
 
   const loadReservations = useCallback(async () => {
@@ -145,6 +146,19 @@ export default function AdminPage() {
     (r) => mapStatus(r.estados_reserva.nombre_estado) !== "cancelled"
   ).length;
 
+  const FILTER_OPTIONS = ["Todas", "Pendientes", "Confirmadas", "Canceladas"];
+  const STATUS_MAP: Record<string, "pending" | "confirmed" | "cancelled"> = {
+    Pendientes: "pending",
+    Confirmadas: "confirmed",
+    Canceladas: "cancelled",
+  };
+  const filteredReservations =
+    activeFilter === "Todas"
+      ? reservations
+      : reservations.filter(
+          (r) => mapStatus(r.estados_reserva.nombre_estado) === STATUS_MAP[activeFilter]
+        );
+
   return (
     <>
       <main className="flex-1 w-full">
@@ -185,6 +199,23 @@ export default function AdminPage() {
             Todas las reservaciones
           </h2>
 
+          {/* Filter bar */}
+          <div className="flex gap-2 overflow-x-auto pb-1 mb-6">
+            {FILTER_OPTIONS.map((option) => (
+              <button
+                key={option}
+                onClick={() => setActiveFilter(option)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer ${
+                  activeFilter === option
+                    ? "bg-green-primary text-white"
+                    : "border border-border text-text-dark bg-white hover:bg-gray-50"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+
           {isLoading ? (
             <div className="bg-white rounded-2xl border border-border p-12 text-center">
               <p className="text-text-muted">Cargando reservaciones...</p>
@@ -193,9 +224,13 @@ export default function AdminPage() {
             <div className="bg-white rounded-2xl border border-border p-12 text-center">
               <p className="text-text-muted">Aún no hay reservaciones registradas.</p>
             </div>
+          ) : filteredReservations.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-border p-12 text-center">
+              <p className="text-text-muted">No hay reservaciones para este filtro.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {reservations.map((res) => {
+              {filteredReservations.map((res) => {
                 const status = mapStatus(res.estados_reserva.nombre_estado);
                 const fullName = `${res.usuarios.nombre} ${res.usuarios.apellido}`;
                 const time = `${formatTo12h(res.bloques_horarios.hora_inicio)} - ${formatTo12h(res.bloques_horarios.hora_fin)}`;
