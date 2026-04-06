@@ -8,7 +8,6 @@ import Navbar from "@/components/organisms/Navbar";
 import Footer from "@/components/organisms/Footer";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
-import { addReservation, type Reservation } from "@/lib/reservations";
 import { bookingSchema, type BookingFormData } from "@/lib/schemas";
 import { supabase } from "@/lib/supabase";
 
@@ -59,9 +58,9 @@ export default function BookingPage() {
   const [selectedType, setSelectedType] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [dbTimeSlots, setDbTimeSlots] = useState<BloqueHorario[]>([]); // <--- Nuevo estado
+  const [dbTimeSlots, setDbTimeSlots] = useState<BloqueHorario[]>([]);
 
-  const [selectedTime, setSelectedTime] = useState<number | null>(null); // <--- Ahora es un número (ID del bloque)
+  const [selectedTime, setSelectedTime] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState(0);
 
   const [showSuccess, setShowSuccess] = useState(false);
@@ -101,25 +100,87 @@ export default function BookingPage() {
   }, []);
 
 
-  const onSubmit = (data: BookingFormData) => {
-    const selectedVisitName = dbVisitTypes.find(t => t.id_tipo_visita === selectedType)?.nombre_visita || "guided";
-    const selectedSlot = dbTimeSlots.find(s => s.id_bloque === selectedTime);
+  const onSubmit = async (data: BookingFormData) => {
+    const selectedSlot = dbTimeSlots.find((s) => s.id_bloque === selectedTime);
+    if (!selectedSlot || !selectedType) {
+      alert("Por favor, seleccione un tipo de visita y un horario válido.");
+      return;
+    }
 
-    if (!selectedSlot) return;
+    setIsLoading(true);
 
-    const timeString = formatTimeRange(selectedSlot.hora_inicio, selectedSlot.hora_fin);
+    const nameParts = data.fullName.trim().split(" ");
+    const nombre = nameParts[0];
+    const apellido = nameParts.slice(1).join(" ") || "N/A";
 
-    addReservation({
-      fullName: data.fullName.trim(),
-      cedula: data.cedula.trim(),
-      email: data.email.trim(),
-      visitType: selectedVisitName as any,
-      date: dates[selectedDate].full,
-      time: timeString, // Pasamos el string formateado bonito
-    });
-    setShowSuccess(true);
+    const diaNum = dates[selectedDate].date;
+    const formattedDate = `2026-05-${String(diaNum).padStart(2, '0')}`;
+
+    try {
+      let idUsuario = null;
+
+      const { data: existingUser, error: searchError } = await supabase
+        .from('usuarios')
+        .select('id_usuario')
+        .eq('cedula', data.cedula.trim())
+        .single();
+
+      if (existingUser) {
+        idUsuario = existingUser.id_usuario;
+      } else {
+        const { data: newUser, error: createError } = await supabase
+          .from('usuarios')
+          .insert({
+            cedula: data.cedula.trim(),
+            nombre: nombre,
+            apellido: apellido,
+            correo: data.email.trim(),
+            id_rol: 2
+          })
+          .select('id_usuario')
+          .single();
+
+        if (createError) throw createError;
+        idUsuario = newUser.id_usuario;
+      }
+
+      const { data: nuevaReserva, error: reservaError } = await supabase
+        .from('reservas')
+        .insert({
+          fecha_reserva: formattedDate,
+          id_usuario: idUsuario,
+          id_tipo_visita: selectedType,
+          id_bloque: selectedTime,
+          id_estado: 1
+        })
+        .select('id_reserva')
+        .single();
+
+      if (reservaError) {
+        if (reservaError.code === '23505') {
+          alert("Lo sentimos, este turno ya fue reservado en esta fecha. Por favor elige otro horario.");
+          setIsLoading(false);
+          return;
+        }
+        throw reservaError;
+      }
+
+      await supabase.from('historial_estados_reserva').insert({
+        id_usuario: idUsuario,
+        id_reserva: nuevaReserva.id_reserva,
+        id_estado: 1,
+        comentario: "Reserva inicial creada desde la web"
+      });
+
+      setShowSuccess(true);
+
+    } catch (err) {
+      console.error("Error completo al procesar la reserva:", err);
+      alert("Ocurrió un error inesperado al procesar tu reserva. Intenta de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   const handleContinue = () => {
     setShowSuccess(false);
     router.push("/admin");
