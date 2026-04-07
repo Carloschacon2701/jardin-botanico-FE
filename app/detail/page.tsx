@@ -25,9 +25,9 @@ export default function DetailPage() {
       </div>
 
       {/* Mobile: compact top app bar */}
-      <header className="lg:hidden sticky top-0 z-50 bg-white border-b border-[var(--border)] flex items-center px-4 h-[73px]">
+      <header className="lg:hidden sticky top-0 z-50 bg-white border-b border-border flex items-center px-4 h-18.25">
         <BackButton />
-        <h1 className="flex-1 text-center text-lg font-bold text-[var(--green-primary)] pr-9">
+        <h1 className="flex-1 text-center text-lg font-bold text-green-primary pr-9">
           Red Fox Habitat
         </h1>
       </header>
@@ -36,7 +36,7 @@ export default function DetailPage() {
         {/* ===== MOBILE LAYOUT ===== */}
         <div className="lg:hidden flex flex-col">
           {/* Hero image */}
-          <div className="relative w-full h-[320px]">
+          <div className="relative w-full h-80">
             <Image
               src={thumbnails[activeThumb].src}
               alt={thumbnails[activeThumb].alt}
@@ -53,9 +53,9 @@ export default function DetailPage() {
               <button
                 key={thumb.id}
                 onClick={() => setActiveThumb(i)}
-                className={`relative w-[77px] h-[77px] rounded-xl overflow-hidden cursor-pointer transition-all shrink-0 ${
+                className={`relative w-19.25 h-19.25 rounded-xl overflow-hidden cursor-pointer transition-all shrink-0 ${
                   i === activeThumb
-                    ? "ring-2 ring-[var(--green-primary)] ring-offset-2"
+                    ? "ring-2 ring-green-primary ring-offset-2"
                     : "opacity-60 hover:opacity-100"
                 }`}
                 aria-label={`Ver imagen ${i + 1}`}
@@ -73,10 +73,10 @@ export default function DetailPage() {
 
           {/* Title & description */}
           <div className="flex flex-col gap-4 px-4 pb-4">
-            <h2 className="text-[28px] font-bold text-[var(--green-primary)] leading-tight">
+            <h2 className="text-[28px] font-bold text-green-primary leading-tight">
               Red Fox Habitat
             </h2>
-            <p className="text-base text-[var(--text-dark)] leading-[26px]">
+            <p className="text-base text-text-dark leading-6.5">
               The red fox (Vulpes vulpes) is the largest of the true foxes and
               one of the most widely distributed members of the order Carnivora,
               being present across the entire Northern Hemisphere. In our
@@ -87,7 +87,7 @@ export default function DetailPage() {
           </div>
 
           {/* Mobile bottom CTA */}
-          <div className="sticky bottom-0 bg-white border-t border-[var(--border)] px-10 py-4">
+          <div className="sticky bottom-0 bg-white border-t border-border px-10 py-4">
             <Button href="/donate" size="lg" fullWidth>
               <HeartIcon />
               <span className="ml-2">Donar</span>
@@ -107,17 +107,17 @@ export default function DetailPage() {
               className="object-cover"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/10 to-transparent pointer-events-none" />
           </div>
 
           {/* Right: content */}
           <div className="flex flex-col px-16 py-16">
             {/* Title + description */}
             <div className="flex flex-col gap-6 mb-10">
-              <h2 className="text-5xl font-black text-[var(--green-primary)] tracking-tight leading-tight">
+              <h2 className="text-5xl font-black text-green-primary tracking-tight leading-tight">
                 Red Fox Habitat
               </h2>
-              <div className="flex flex-col gap-5 text-lg text-[var(--text-dark)] leading-relaxed">
+              <div className="flex flex-col gap-5 text-lg text-text-dark leading-relaxed">
                 <p>
                   The Red Fox habitat in our botanical garden mimics the diverse
                   temperate forests where these adaptable mammals thrive. Known
@@ -140,9 +140,9 @@ export default function DetailPage() {
                 <button
                   key={thumb.id}
                   onClick={() => setActiveThumb(i)}
-                  className={`relative w-[97px] h-[80px] rounded-xl overflow-hidden cursor-pointer transition-all shrink-0 ${
+                  className={`relative w-24.25 h-20 rounded-xl overflow-hidden cursor-pointer transition-all shrink-0 ${
                     i === activeThumb
-                      ? "ring-2 ring-[var(--green-primary)] ring-offset-2 scale-105"
+                      ? "ring-2 ring-green-primary ring-offset-2 scale-105"
                       : "opacity-60 hover:opacity-100"
                   }`}
                   aria-label={`Ver imagen ${i + 1}`}
