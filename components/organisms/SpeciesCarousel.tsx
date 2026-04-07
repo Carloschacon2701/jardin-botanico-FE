@@ -2,45 +2,13 @@
 
 import { useRef } from "react";
 import SpeciesCard from "@/components/molecules/SpeciesCard";
+import type { SeccionResumen } from "@/lib/secciones";
 
-const species = [
-  {
-    title: "Red Fox Habitat",
-    description: "Observe local wildlife in their natural woodland environment.",
-    category: "Wildlife",
-    imageSrc: "/images/red-fox.jpg",
-  },
-  {
-    title: "Tropical Orchids",
-    description:
-      "Discover rare and exotic orchid species from around the world.",
-    category: "Flora",
-    imageSrc: "/images/red-fox.jpg",
-  },
-  {
-    title: "Butterfly Garden",
-    description:
-      "Walk through a living exhibit of native butterfly species.",
-    category: "Insects",
-    imageSrc: "/images/red-fox.jpg",
-  },
-  {
-    title: "Medicinal Plants",
-    description:
-      "Learn about traditional medicinal plants of the Andes region.",
-    category: "Botany",
-    imageSrc: "/images/red-fox.jpg",
-  },
-  {
-    title: "Aquatic Garden",
-    description:
-      "Explore our aquatic ecosystems featuring water lilies and koi.",
-    category: "Aquatic",
-    imageSrc: "/images/red-fox.jpg",
-  },
-];
+interface SpeciesCarouselProps {
+  secciones: SeccionResumen[];
+}
 
-export default function SpeciesCarousel() {
+export default function SpeciesCarousel({ secciones }: SpeciesCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -114,9 +82,14 @@ export default function SpeciesCarousel() {
           className="flex gap-5 md:gap-7 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {species.map((item) => (
-            <div key={item.title} className="snap-start">
-              <SpeciesCard {...item} />
+          {secciones.map((seccion) => (
+            <div key={seccion.id_seccion} className="snap-start">
+              <SpeciesCard
+                title={seccion.nombre}
+                description={seccion.descripcion_corta}
+                imageSrc={seccion.url_imagen_principal}
+                detailHref={`/secciones/${seccion.id_seccion}`}
+              />
             </div>
           ))}
         </div>

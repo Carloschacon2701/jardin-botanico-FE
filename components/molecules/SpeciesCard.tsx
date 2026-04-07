@@ -1,55 +1,42 @@
 import Image from "next/image";
 import Link from "next/link";
-import Button from "@/components/atoms/Button";
 
 interface SpeciesCardProps {
   title: string;
   description: string;
-  category: string;
   imageSrc: string;
   imageAlt?: string;
-  detailHref?: string;
-  donateHref?: string;
+  detailHref: string;
 }
 
 export default function SpeciesCard({
   title,
   description,
-  category,
   imageSrc,
   imageAlt,
-  detailHref = "/detail",
-  donateHref = "#",
+  detailHref,
 }: SpeciesCardProps) {
   return (
-    <article className="group flex flex-col bg-white rounded-2xl border border-(--border-green-subtle) shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 w-full min-w-55 max-w-70 shrink-0">
-      <Link href={detailHref} className="relative h-56 overflow-hidden block">
-        <Image
-          src={imageSrc}
-          alt={imageAlt || title}
-          fill
-          sizes="(max-width: 640px) 280px, 236px"
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[10px] font-black uppercase tracking-[1px] text-green-primary">
-          {category}
-        </span>
-      </Link>
-      <div className="flex flex-col gap-4 p-6 flex-1">
-        <div className="flex flex-col gap-2 flex-1">
-          <Link href={detailHref} className="no-underline">
-            <h3 className="text-xl font-bold text-green-primary leading-7 hover:text-terracotta transition-colors">
-              {title}
-            </h3>
-          </Link>
-          <p className="text-sm text-text-dark leading-relaxed">
+    <Link href={detailHref} className="no-underline block min-w-55 max-w-70 shrink-0">
+      <article className="group flex flex-col bg-white rounded-2xl border border-(--border-green-subtle) shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 h-full w-full">
+        <div className="relative h-56 overflow-hidden">
+          <Image
+            src={imageSrc}
+            alt={imageAlt || title}
+            fill
+            sizes="(max-width: 640px) 280px, 236px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <div className="flex flex-col gap-2 p-6 flex-1">
+          <h3 className="text-xl font-bold text-green-primary leading-7 group-hover:text-terracotta transition-colors">
+            {title}
+          </h3>
+          <p className="text-sm text-text-dark leading-relaxed line-clamp-3">
             {description}
           </p>
         </div>
-        <Button variant="donate" size="sm" fullWidth href={donateHref}>
-          Donate
-        </Button>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 }
