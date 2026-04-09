@@ -108,7 +108,7 @@ export default function AdminPage() {
     return (
       <main className="flex flex-1 items-center justify-center">
         <p className="text-lg text-green-primary font-semibold">
-          Cargando panel...
+          Cargando panel de administración...
         </p>
       </main>
     );
@@ -203,15 +203,15 @@ export default function AdminPage() {
           <div className="mb-8">
             <div className="mb-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-text-muted mb-1">
-                RESUMEN
+                PANEL DE CONTROL
               </p>
               <h1 className="text-2xl md:text-3xl font-bold text-green-primary">
-                Administración de reservaciones
+                Administración de reservas
               </h1>
             </div>
             <p className="text-base text-text-dark max-w-lg">
-              Supervisión centralizada de todo el flujo de visitantes y los
-              programas educativos.
+              Gestiona reservas y visitantes desde un solo lugar para ofrecer
+              una experiencia organizada y acogedora.
             </p>
           </div>
 
@@ -224,7 +224,7 @@ export default function AdminPage() {
                   : "border-transparent text-text-muted hover:text-green-primary"
                 }`}
             >
-              Reservaciones
+              Reservas
             </button>
             <button
               onClick={() => setActiveTab("usuarios")}
@@ -233,7 +233,7 @@ export default function AdminPage() {
                   : "border-transparent text-text-muted hover:text-green-primary"
                 }`}
             >
-              Gestión de Usuarios
+              Usuarios
             </button>
           </div>
 
@@ -244,7 +244,7 @@ export default function AdminPage() {
               <div className="bg-white rounded-2xl shadow-sm border border-border p-6 mb-8 flex items-center justify-between max-w-sm">
                 <div>
                   <p className="text-sm text-text-muted mb-1">
-                    Reservaciones activas
+                    Reservas activas
                   </p>
                   <p className="text-4xl font-bold text-green-primary">
                     {activeCount}
@@ -257,7 +257,7 @@ export default function AdminPage() {
 
               {/* Section heading */}
               <h2 className="text-xl font-bold text-green-primary mb-4">
-                Todas las reservaciones
+                Todas las reservas
               </h2>
 
               {/* Filter bar */}
@@ -278,15 +278,15 @@ export default function AdminPage() {
 
               {isLoading ? (
                 <div className="bg-white rounded-2xl border border-border p-12 text-center">
-                  <p className="text-text-muted">Cargando reservaciones...</p>
+                  <p className="text-text-muted">Cargando reservas...</p>
                 </div>
               ) : reservations.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-border p-12 text-center">
-                  <p className="text-text-muted">Aún no hay reservaciones registradas.</p>
+                  <p className="text-text-muted">Aún no hay reservas registradas.</p>
                 </div>
               ) : filteredReservations.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-border p-12 text-center">
-                  <p className="text-text-muted">No hay reservaciones para este filtro.</p>
+                  <p className="text-text-muted">No hay reservas para este filtro.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -328,20 +328,20 @@ export default function AdminPage() {
                 Visitantes registrados
               </h2>
               <p className="text-sm text-text-muted mb-6">
-                Promueve visitantes a administradores del sistema.
+                Asigna permisos de administración a visitantes registrados.
               </p>
 
               {isLoadingVisitors ? (
                 <div className="bg-white rounded-2xl border border-border p-12 text-center">
-                  <p className="text-text-muted">Cargando visitantes...</p>
+                  <p className="text-text-muted">Cargando visitantes registrados...</p>
                 </div>
               ) : visitors.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-border p-12 text-center">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(45,106,79,0.1)] flex items-center justify-center">
                     <UsersIcon />
                   </div>
-                  <p className="text-text-muted font-semibold">No hay visitantes por promover</p>
-                  <p className="text-sm text-text-muted mt-1">Todos los usuarios ya tienen rol de administrador.</p>
+                  <p className="text-text-muted font-semibold">No hay visitantes pendientes por promover</p>
+                  <p className="text-sm text-text-muted mt-1">Todos los usuarios actuales ya cuentan con rol de administrador.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -371,7 +371,7 @@ export default function AdminPage() {
                         disabled={promotingId === v.id_usuario}
                         className="w-full py-2.5 rounded-xl bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
                       >
-                        {promotingId === v.id_usuario ? "Promoviendo..." : "Convertir en Admin"}
+                        {promotingId === v.id_usuario ? "Asignando permisos..." : "Asignar como administrador"}
                       </button>
                     </div>
                   ))}
@@ -484,7 +484,7 @@ export default function AdminPage() {
               onClick={() => setShowConfirmSuccess(false)}
               className="px-6 py-2 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
             >
-              Continuar
+              Cerrar
             </button>
           </div>
         </div>
@@ -511,7 +511,7 @@ export default function AdminPage() {
               onClick={() => setShowSuccess(false)}
               className="px-6 py-2 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
             >
-              Continuar
+              Cerrar
             </button>
           </div>
         </div>

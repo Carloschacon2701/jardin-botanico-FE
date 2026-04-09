@@ -30,8 +30,8 @@ export default function SpeciesCarousel({ secciones }: SpeciesCarouselProps) {
               Descubre cada uno de nuestros espacios
             </h2>
             <p className="text-base md:text-lg text-text-dark">
-              Diverse ecosystems carefully maintained for conservation and
-              education.
+              Ecosistemas diversos, cuidados para la conservación y la
+              educación ambiental.
             </p>
           </div>
 

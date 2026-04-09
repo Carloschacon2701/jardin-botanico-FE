@@ -140,7 +140,7 @@ export default function BookingPage() {
   const onSubmit = async (data: BookingFormData) => {
     const selectedSlot = dbTimeSlots.find((s) => s.id_bloque === selectedTime);
     if (!selectedSlot || !selectedType) {
-      alert("Por favor, seleccione un tipo de visita y un horario válido.");
+      alert("Por favor, selecciona un tipo de visita y un horario válido.");
       return;
     }
 
@@ -148,7 +148,7 @@ export default function BookingPage() {
 
     const nameParts = data.fullName.trim().split(" ");
     const nombre = nameParts[0];
-    const apellido = nameParts.slice(1).join(" ") || "N/A";
+    const apellido = nameParts.slice(1).join(" ") || "Sin apellido";
 
     const formattedDate = dates[selectedDate].iso;
 
@@ -253,7 +253,7 @@ export default function BookingPage() {
                 <div className="flex flex-col gap-5">
                   <Input
                     label="Nombre completo"
-                    placeholder="e.g. Jane Doe"
+                    placeholder="Ej.: María Fernanda Pérez"
                     autoComplete="name"
                     {...register("fullName")}
                     error={errors.fullName?.message}
@@ -265,9 +265,9 @@ export default function BookingPage() {
                     error={errors.cedula?.message}
                   />
                   <Input
-                    label="Email"
+                    label="Correo electrónico"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="nombre@correo.com"
                     autoComplete="email"
                     {...register("email")}
                     error={errors.email?.message}
@@ -304,13 +304,13 @@ export default function BookingPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <TagIcon />
                   <h3 className="text-lg font-bold text-green-primary">
-                    Seleccione el tipo de visita
+                    Selecciona el tipo de visita
                   </h3>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   {isLoading ? (
-                    <p className="text-sm text-text-muted animate-pulse p-4">Cargando experiencias desde la base de datos...</p>
+                    <p className="text-sm text-text-muted animate-pulse p-4">Cargando opciones de visita...</p>
                   ) : (
                     dbVisitTypes.map((type) => (
                       <button
@@ -341,7 +341,7 @@ export default function BookingPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <CalendarIcon />
                   <h3 className="text-lg font-bold text-green-primary">
-                    Seleccione la fecha de su visita
+                    Selecciona la fecha de tu visita
                   </h3>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2 w-full min-w-0">
@@ -369,12 +369,12 @@ export default function BookingPage() {
                 <div className="flex items-center gap-2 mb-4">
                   <ClockIcon />
                   <h3 className="text-lg font-bold text-green-primary">
-                    Seleccione el horario de su visita
+                    Selecciona el horario de tu visita
                   </h3>
                 </div>
                 <div className="flex flex-col gap-3">
                   {isLoading ? (
-                    <p className="text-sm text-text-muted animate-pulse p-4">Cargando horarios disponibles...</p>
+                    <p className="text-sm text-text-muted animate-pulse p-4">Cargando horarios de visita...</p>
                   ) : (
                     dbTimeSlots.map((slot) => {
                       const timeString = formatTimeRange(slot.hora_inicio, slot.hora_fin);
@@ -403,7 +403,7 @@ export default function BookingPage() {
                             </span>
                           </div>
                           <span className="text-sm text-text-muted">
-                            15 spots left
+                            15 cupos disponibles
                           </span>
                         </button>
                       );
@@ -428,7 +428,7 @@ export default function BookingPage() {
               <SuccessIcon />
             </div>
             <h3 className="text-xl font-bold text-green-primary mb-2">
-              Agendamiento exitoso
+              Reserva registrada con éxito
             </h3>
             <p className="text-sm text-text-dark mb-8 leading-relaxed">
               Muchas gracias por agendar tu visita, <strong>{getValues("fullName")}</strong>.
@@ -440,7 +440,7 @@ export default function BookingPage() {
               onClick={handleContinue}
               className="px-8 py-2.5 rounded-lg bg-green-primary text-white text-sm font-semibold hover:brightness-110 transition-all cursor-pointer"
             >
-              Continuar
+              Volver al panel
             </button>
           </div>
         </div>

@@ -31,7 +31,7 @@ export default function RegisterPage() {
   });
 
   const onSubmit = (data: RegisterFormData) => {
-    console.log("Register:", data);
+    console.log("Registro:", data);
   };
 
   return (
@@ -58,7 +58,7 @@ export default function RegisterPage() {
               aria-hidden="true"
             />
             <h2 className="text-2xl font-bold tracking-tight">
-              JARDIN BOTANICO UNET
+              JARDÍN BOTÁNICO UNET
             </h2>
           </div>
           <p className="text-base text-white/80 max-w-md leading-relaxed">
@@ -92,7 +92,7 @@ export default function RegisterPage() {
                 ¡Únete a nosotros!
               </h1>
               <p className="text-base text-(--green-primary)/70 text-center">
-                Ingrese sus datos para crear su cuenta
+                Ingresa tus datos para crear tu cuenta
               </p>
             </div>
 
@@ -101,7 +101,7 @@ export default function RegisterPage() {
               <Input
                 label="Nombre completo"
                 type="text"
-                placeholder="Enter your full name"
+                placeholder="Ej.: María Fernanda Pérez"
                 autoComplete="name"
                 {...register("fullName")}
                 error={errors.fullName?.message}
@@ -109,9 +109,9 @@ export default function RegisterPage() {
               />
 
               <Input
-                label="Email"
+                label="Correo electrónico"
                 type="email"
-                placeholder="nature@example.com"
+                placeholder="nombre@correo.com"
                 autoComplete="email"
                 {...register("email")}
                 error={errors.email?.message}
@@ -157,7 +157,7 @@ export default function RegisterPage() {
             {/* Footer link */}
             <div className="mt-8 text-center text-sm">
               <span className="text-text-dark">
-                Ya tienes una cuenta?{" "}
+                ¿Ya tienes una cuenta?{" "}
               </span>
               <Link
                 href="/login"

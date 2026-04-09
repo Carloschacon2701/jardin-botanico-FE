@@ -30,7 +30,7 @@ export default function MobileSidebar({
   const sidebarLinks = [
     ...baseSidebarLinks,
     ...(showAdminLink
-      ? [{ label: "Panel administrativo", href: "/admin", icon: AdminIcon }]
+        ? [{ label: "Panel de administración", href: "/admin", icon: AdminIcon }]
       : []),
   ];
 
@@ -128,7 +128,7 @@ export default function MobileSidebar({
               onClick={onClose}
             >
               <HeartIcon />
-              <span className="ml-2">Donar</span>
+              <span className="ml-2">Apoyar al jardín</span>
             </Button>
           </div>
         </nav>

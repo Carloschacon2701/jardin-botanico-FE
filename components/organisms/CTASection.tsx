@@ -28,7 +28,7 @@ export default function CTASection() {
             </p>
           </div>
           <Button href="/booking" size="lg">
-            Agenda tu visita ahora!
+            Agenda tu visita ahora
           </Button>
         </div>
       </div>

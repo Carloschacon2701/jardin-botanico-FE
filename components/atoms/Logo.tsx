@@ -38,7 +38,7 @@ export default function Logo({
         <span
           className={`font-bold text-green-primary tracking-tight ${text}`}
         >
-          Jardin Botanico UNET
+          Jardín Botánico UNET
         </span>
       )}
     </Link>

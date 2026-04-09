@@ -11,7 +11,7 @@ import { supabase } from "@/lib/supabase";
 
 const baseNavLinks = [
   { label: "Inicio", href: "/" },
-  { label: "Agendar Visita", href: "/booking" },
+  { label: "Agendar visita", href: "/booking" },
 ];
 
 export default function Navbar() {
@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const navLinks = [
     ...baseNavLinks,
-    ...(isAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
+    ...(isAdmin ? [{ label: "Panel de administración", href: "/admin" }] : []),
   ];
 
   return (
@@ -77,7 +77,7 @@ export default function Navbar() {
               </Button>
             ) : (
               <Button href="/login" size="sm" variant="outline">
-                INICIAR SESION
+                INICIAR SESIÓN
               </Button>
             )}
           </div>

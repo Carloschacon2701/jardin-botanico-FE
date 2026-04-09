@@ -36,7 +36,7 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (error) {
-      setErrorMsg("Credenciales incorrectas. Verifique su email y contraseña.");
+      setErrorMsg("Credenciales incorrectas. Verifica tu correo y contraseña.");
       return;
     }
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
               aria-hidden="true"
             />
             <h2 className="text-2xl font-bold tracking-tight">
-              JARDIN BOTANICO UNET
+              JARDÍN BOTÁNICO UNET
             </h2>
           </div>
           <p className="text-base text-white/80 max-w-md leading-relaxed">
@@ -107,7 +107,7 @@ export default function LoginPage() {
                 ¡Bienvenido!
               </h1>
               <p className="text-base text-(--green-primary)/70 text-center">
-                Ingrese sus datos para acceder a su cuenta
+                Ingresa tus datos para acceder a tu cuenta
               </p>
             </div>
 
@@ -120,9 +120,9 @@ export default function LoginPage() {
               )}
 
               <Input
-                label="Email Address"
+                label="Correo electrónico"
                 type="email"
-                placeholder="hello@botanical.com"
+                placeholder="nombre@correo.com"
                 autoComplete="email"
                 {...register("email")}
                 error={errors.email?.message}
@@ -134,13 +134,13 @@ export default function LoginPage() {
                     htmlFor="password"
                     className="text-sm font-semibold text-green-primary tracking-wide"
                   >
-                    Password
+                    Contraseña
                   </label>
                   <Link
                     href="#"
                     className="text-xs font-medium text-terracotta hover:underline no-underline"
                   >
-                    Forgot password?
+                    ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
                 <Input
@@ -164,7 +164,7 @@ export default function LoginPage() {
               </div>
 
               <Button type="submit" fullWidth size="lg" disabled={isLoading}>
-                {isLoading ? "Ingresando..." : "Login"}
+                {isLoading ? "Ingresando..." : "Iniciar sesión"}
               </Button>
             </form>
 
@@ -172,7 +172,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-4 w-full mt-8">
               <div className="flex-1 h-px bg-(--border-green)" />
               <span className="text-sm text-(--green-primary)/40">
-                o inicia con
+                o continúa con
               </span>
               <div className="flex-1 h-px bg-(--border-green)" />
             </div>
@@ -200,7 +200,7 @@ export default function LoginPage() {
             {/* Footer link */}
             <div className="mt-10 text-center text-sm">
               <span className="text-text-dark">
-                No tiene una cuenta?{" "}
+                ¿No tienes una cuenta?{" "}
               </span>
               <Link
                 href="/register"
