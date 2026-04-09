@@ -1,28 +1,38 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { HTMLAttributes } from "react";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
+  className?: HTMLAttributes<HTMLAnchorElement>["className"];
 }
 
 const sizeMap = {
-  sm: { icon: 18, text: "text-base" },
-  md: { icon: 22, text: "text-xl" },
-  lg: { icon: 28, text: "text-2xl" },
+  sm: { width: 88, height: 30, text: "text-base" },
+  md: { width: 108, height: 36, text: "text-xl" },
+  lg: { width: 136, height: 46, text: "text-2xl" },
 };
 
-export default function Logo({ size = "md", showText = true }: LogoProps) {
-  const { icon, text } = sizeMap[size];
+export default function Logo({
+  size = "md",
+  showText = false,
+  className,
+}: LogoProps) {
+  const { width, height, text } = sizeMap[size];
 
   return (
-    <Link href="/" className="flex items-center gap-2 no-underline">
+    <Link
+      href="/"
+      className={`flex items-center gap-2 no-underline ${className ?? ""}`}
+    >
       <Image
-        src="/images/logo-leaf.svg"
+        src="/images/logo-unet.png"
         alt="Jardín Botánico UNET"
-        width={icon}
-        height={icon + 3}
-        className="shrink-0"
+        width={width}
+        height={height}
+        priority
+        className="h-auto w-auto max-h-10 shrink-0 object-contain"
       />
       {showText && (
         <span

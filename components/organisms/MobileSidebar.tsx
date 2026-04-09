@@ -8,16 +8,32 @@ import Button from "@/components/atoms/Button";
 interface MobileSidebarProps {
   open: boolean;
   onClose: () => void;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  showAdminLink: boolean;
+  onSignOut: () => void | Promise<void>;
 }
 
-const sidebarLinks = [
+const baseSidebarLinks = [
   { label: "Inicio", href: "/", icon: HomeIcon },
-  { label: "Panel administrativo", href: "/admin", icon: AdminIcon },
   { label: "Agendar visita", href: "/booking", icon: CalendarIcon },
-  { label: "Iniciar sesión", href: "/login", icon: LoginIcon },
 ];
 
-export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
+export default function MobileSidebar({
+  open,
+  onClose,
+  isLoading,
+  isAuthenticated,
+  showAdminLink,
+  onSignOut,
+}: MobileSidebarProps) {
+  const sidebarLinks = [
+    ...baseSidebarLinks,
+    ...(showAdminLink
+      ? [{ label: "Panel administrativo", href: "/admin", icon: AdminIcon }]
+      : []),
+  ];
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -87,13 +103,28 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
                 </Link>
               </li>
             ))}
+
+            {!isLoading && !isAuthenticated && (
+              <li>
+                <Link
+                  href="/login"
+                  onClick={onClose}
+                  className="flex items-center gap-4 px-4 py-4 rounded-xl text-green-primary hover:bg-green-light transition-colors no-underline"
+                >
+                  <LoginIcon />
+                  <span className="text-base font-medium">Iniciar sesión</span>
+                </Link>
+              </li>
+            )}
           </ul>
 
           <div className="mt-8">
             <Button
               variant="primary"
               fullWidth
-              href="/donate"
+              href="https://api.whatsapp.com/send?phone=573164866145"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={onClose}
             >
               <HeartIcon />
@@ -104,9 +135,17 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
         {/* Footer */}
         <div className="px-6 py-6 border-t border-border">
-          <button className="text-sm text-text-muted hover:text-green-primary transition-colors cursor-pointer w-full text-center">
-            Cerrar sesión
-          </button>
+          {isLoading ? (
+            <div className="h-10 w-full rounded-lg bg-gray-200 animate-pulse" />
+          ) : isAuthenticated ? (
+            <Button fullWidth variant="outline" size="sm" onClick={onSignOut}>
+              CERRAR SESIÓN
+            </Button>
+          ) : (
+            <Button fullWidth variant="outline" size="sm" href="/login" onClick={onClose}>
+              INICIAR SESIÓN
+            </Button>
+          )}
         </div>
       </aside>
     </>
