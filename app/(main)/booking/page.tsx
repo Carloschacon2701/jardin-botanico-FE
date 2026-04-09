@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import Input from "@/components/atoms/Input";
 import Button from "@/components/atoms/Button";
 import { bookingSchema, type BookingFormData } from "@/lib/schemas";
@@ -284,10 +285,14 @@ export default function BookingPage() {
               </div>
 
               <div className="hidden lg:block relative h-48 rounded-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-green-primary">
-                  <div className="absolute inset-0 bg-linear-to-t from-green-primary to-transparent" />
-                </div>
-                <p className="absolute bottom-4 left-4 text-sm text-white/80">
+                <Image
+                  src="/images/jardin.png"
+                  alt="Vista del Jardín Botánico UNET"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-green-primary/80 to-transparent" />
+                <p className="absolute bottom-4 left-4 text-sm text-white/80 z-10">
                   Jardín Botánico UNET - Área de invernadero
                 </p>
               </div>
